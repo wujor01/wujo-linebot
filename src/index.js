@@ -48,7 +48,7 @@ async function MongoFindQuery(query, collection = "bubble", fieldsRemove = {_id:
     }
 }
 
-async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/profile/Uf072abc9505c04336bb29af8ae9c1a11', callbackFunction) {
+async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/profile/Uf072abc9505c04336bb29af8ae9c1a11') {
   try {
     var config = {
       method: method,
@@ -71,7 +71,7 @@ module.exports = async function App(context) {
 
     switch (inputText) {
       case 'chào':
-        var res = await CallAPILine();
+        var res = await CallAPILine('get',`https://api.line.me/v2/bot/profile/${context.session.user.userid}`);
         await context.sendText(`Chao xìn ${res.data.displayName}!`);
         break;
       case 'menu':
