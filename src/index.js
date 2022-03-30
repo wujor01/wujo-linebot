@@ -71,8 +71,7 @@ module.exports = async function App(context) {
 
     switch (inputText) {
       case 'chào':
-        console.log(context.session);
-        var res = await CallAPILine('get',`https://api.line.me/v2/bot/profile/${context.session.user.userid}`);
+        var res = await CallAPILine('get',`https://api.line.me/v2/bot/profile/${context.session.user.id}`);
         await context.sendText(`Chao xìn ${res.data.displayName}!`);
         break;
       case 'menu':
