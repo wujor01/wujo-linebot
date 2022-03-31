@@ -103,11 +103,12 @@ module.exports = async function App(context) {
           );
 
           var obj = {
-            productid: data[0]._id,
-            userid: context.session.user.id,
-            username: objUser.data.displayName,
+            product: data[0],
+            user:{
+              _id: context.session.user.id,
+              username: objUser.data.displayName,
+            },
             quantity: 1,
-            price: data[0].price,
             payment: data[0].price * 1,
             ispaid: false,
             createdate: new Date()
