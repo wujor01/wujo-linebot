@@ -118,7 +118,7 @@ module.exports = async function App(context) {
           var txt = '';
           
           var results = groupBy(listorder, function(n) {
-            return n.product;
+            return n.product._id;
           });
 
           console.log(JSON.stringify(results));
