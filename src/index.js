@@ -98,9 +98,6 @@ async function ConfirmOrder(dateNow, userid, username)
   if(listorder.length == 0)
     return;
 
-  var fromdate = new Date(dateNow.setHours(0,0,0,0));
-  var todate = dateNow.addHours(24);
-
   const client = await MongoClient.connect(url, {
     useNewUrlParser: true,
   }).catch((err) => {
@@ -113,6 +110,13 @@ async function ConfirmOrder(dateNow, userid, username)
 
   try {
     var dbo = client.db('mydb');
+
+    var now = new Date();
+    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    dateNow = utc.addHours(7);
+    var fromdate = new Date(dateNow.setHours(0,0,0,0));
+    var todate = dateNow.addHours(24);
+
     var myquery = {
       $and: [
       {createddate : {$gte : fromdate}},
@@ -124,8 +128,8 @@ async function ConfirmOrder(dateNow, userid, username)
 
     await dbo.collection("order").updateMany(myquery, newvalues);
 
-    var now = new Date();
-    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    now = new Date();
+    utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
     var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
 
     await dbo.collection("payment").insertOne({
