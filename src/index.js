@@ -77,6 +77,41 @@ async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/pro
   }
 }
 
+async function GetOrderInDay(dateNow){
+  var fromdate = new Date(dateNow.setHours(0,0,0,0));
+  var todate = dateNow.addHours(24);
+  var objFilter = {
+      $and: [
+      {createddate : {$gte : fromdate}},
+      {createddate : {$lt : todate}},
+      {ispaid : false}
+    ]
+  };
+
+  var listorder = await MongoFindQuery(objFilter, "order",{});
+  var txt = '';
+  
+  var results = _.groupBy(listorder, function(n) {
+    return n.product._id;
+  });
+
+  var listGroup = [];
+  Object.keys(results).forEach(key => {
+    listGroup.push(results[key]);
+  })
+
+  listGroup.forEach(item => {
+    txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
+  });
+  
+  if(txt){
+    var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+    txt += `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
+  }
+
+  return txt;
+}
+
 module.exports = async function App(context) {
   try {
     if (context.event.isText) {
@@ -103,41 +138,17 @@ module.exports = async function App(context) {
   
           await context.sendFlex('Menu', bodySend);
           break;
-        case 'ds order':
-          var fromdate = new Date(dateNow.setHours(0,0,0,0));
-          var todate = dateNow.addHours(24);
-          var objFilter = {
-              $and: [
-              {createddate : {$gte : fromdate}},
-              {createddate : {$lt : todate}},
-              {ispaid : false}
-            ]
-          };
-
-          var listorder = await MongoFindQuery(objFilter, "order",{});
-          var txt = '';
-          
-          var results = _.groupBy(listorder, function(n) {
-            return n.product._id;
-          });
-
-          var listGroup = [];
-          Object.keys(results).forEach(key => {
-            listGroup.push(results[key]);
-          })
-
-          listGroup.forEach(item => {
-            txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
-          });
-          
-          if(txt){
-            var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
-            txt += `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
+        case 'order':
+          var txt = await GetOrderInDay(dateNow);
+  
+          if(txt)
             await context.sendText(txt);
-          }
           else
             await context.sendText("Không có giao dịch trong ngày cần thanh toán");
-  
+
+          break;
+        case 'payment':
+
           break;
         default:
           var data = await MongoFindQuery({productname: inputText}, "product",{});
