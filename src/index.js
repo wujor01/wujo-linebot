@@ -119,7 +119,7 @@ module.exports = async function App(context) {
             quantity: 1,
             payment: data[0].price * 1,
             ispaid: false,
-            createdate: utc.addHours(7)
+            createddate: utc.addHours(7)
           };
 
           var isSuccess = await MongoInsert(obj, "transaction");
