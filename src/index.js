@@ -222,12 +222,12 @@ module.exports = async function App(context) {
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
           );
 
-          var result = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName);
-          if(result)
+          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName);
+          if(totalMoney)
             await context.sendText(`${objUser.data.displayName} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
           else
           await context.sendText('Thanh toán không thành công!');
-          
+
           break;
         default:
           var data = await MongoFindQuery({productname: inputText}, "product",{});
