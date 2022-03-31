@@ -114,6 +114,7 @@ async function ConfirmOrder(dateNow, userid, username)
     var now = new Date();
     var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
     dateNow = utc.addHours(7);
+    var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);;
     var objInsert = {
       user: {
         userid: userid,
@@ -139,9 +140,7 @@ async function ConfirmOrder(dateNow, userid, username)
     console.log(JSON.stringify(myquery));
 
     await dbo.collection("order").updateMany(myquery, newvalues);
-    var totalMoney = objInsert.totalMoney;
-
-    
+        
     return totalMoney;
   } catch (err) {
     console.log(err);
