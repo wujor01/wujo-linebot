@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 var axios = require('axios');
-
 var MongoClient = require('mongodb').MongoClient;
+var groupBy = require('lodash/groupBy');
 var url = process.env.MONGODB_CONNECTION;
 
 Date.prototype.addHours = function(h) {
@@ -114,13 +114,14 @@ module.exports = async function App(context) {
             ]
           };
 
-          var listorder = await MongoFindQuery(objFilter, "transaction",{});
+          var listorder = await MongoFindQuery(objFilter, "order",{});
           var txt = '';
           
-          var results = listorder.reduce(function(results, org) {
-            (results[org.product] = results[org.product] || []).push(org);
-            return results;
-          }, {});
+          var results = groupBy(listorder, function(n) {
+            return n.product;
+          });
+
+          console.log(JSON.stringify(results));
 
           results.forEach(item => {
             txt += `order ${item.length} ${item[0].product.productname} giá bán ${item[0].product.price}\n`
@@ -156,7 +157,7 @@ module.exports = async function App(context) {
               createddate: dateNow
             };
   
-            var isSuccess = await MongoInsert(obj, "transaction");
+            var isSuccess = await MongoInsert(obj, "order");
   
             if(isSuccess)
               await context.sendText(`Order ${inputText} thành công, tiền cần thanh toán ${obj.payment}đ`);
