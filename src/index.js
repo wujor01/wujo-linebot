@@ -78,90 +78,88 @@ async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/pro
 }
 
 module.exports = async function App(context) {
-  if (context.event.isText) {
-    var inputText = context.event.text.toLowerCase();
-
-    var now = new Date();
-    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    var dateNow = utc.addHours(7);
-
-    switch (inputText) {
-      case 'chào':
-        var res = await CallAPILine(
-          'get',
-          `https://api.line.me/v2/bot/profile/${context.session.user.id}`
-        );
-        await context.sendText(`Chao xìn ${res.data.displayName}!`);
-        break;
-      case 'menu':
-        var listBundle = await MongoFindQuery({}, 'bubble');
-        var bodySend = {
-          type: 'carousel',
-          contents: listBundle,
-        };
-
-        await context.sendFlex('Menu', bodySend);
-        break;
-      case 'danh sách cần thanh toán':
-        dateNow.setHour(0,0,0,0);
-        
-        var objFilter = {
-            $and: [
-            {createddate : {$gte : dateNow}},
-            {createddate : {$lte : dateNow.addHours(24)}},
-            {ispaid : false}
-          ]
-        };
-
-        console.log(objFilter);
-
-        var listorder = await MongoFindQuery(objFilter, "transaction",{});
-
-        console.log(listorder);
-
-        var txt = '';
-
-        listorder.forEach(item => {
-          txt += `${item.user.username} order ${item.product.productname} giá ${item.product.price}\n`
-        });
-        if(txt)
-          await context.sendText(txt);
-        else
-          await context.sendText("Không có giao dịch trong ngày cần thanh toán");
-
-        break;
-      default:
-        var data = await MongoFindQuery({productname: inputText}, "product",{});
-
-        if (data[0]) {
-          var objUser = await CallAPILine(
+  try {
+    if (context.event.isText) {
+      var inputText = context.event.text.toLowerCase();
+  
+      var now = new Date();
+      var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+      var dateNow = utc.addHours(7);
+  
+      switch (inputText) {
+        case 'chào':
+          var res = await CallAPILine(
             'get',
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
           );
-
-          var obj = {
-            product: data[0],
-            user:{
-              _id: context.session.user.id,
-              username: objUser.data.displayName,
-            },
-            quantity: 1,
-            payment: data[0].price * 1,
-            ispaid: false,
-            createddate: dateNow
+          await context.sendText(`Chao xìn ${res.data.displayName}!`);
+          break;
+        case 'menu':
+          var listBundle = await MongoFindQuery({}, 'bubble');
+          var bodySend = {
+            type: 'carousel',
+            contents: listBundle,
           };
-
-          var isSuccess = await MongoInsert(obj, "transaction");
-
-          if(isSuccess)
-            await context.sendText(`Order ${inputText} thành công, tiền cần thanh toán ${obj.payment}đ`);
+  
+          await context.sendFlex('Menu', bodySend);
+          break;
+        case 'danh sách cần thanh toán':
+          dateNow.setHours(0,0,0,0);
+          
+          var objFilter = {
+              $and: [
+              {createddate : {$gte : dateNow}},
+              {createddate : {$lte : dateNow.addHours(24)}},
+              {ispaid : false}
+            ]
+          };
+          var listorder = await MongoFindQuery(objFilter, "transaction",{});
+          var txt = '';
+  
+          listorder.forEach(item => {
+            txt += `${item.user.username} order ${item.product.productname} giá ${item.product.price}\n`
+          });
+          if(txt)
+            await context.sendText(txt);
           else
-          await context.sendText(`Lỗi xử lý!`);
-        }else{
-          await context.sendText(`Nói gì zậy?`);
-        }
-
-        break;
+            await context.sendText("Không có giao dịch trong ngày cần thanh toán");
+  
+          break;
+        default:
+          var data = await MongoFindQuery({productname: inputText}, "product",{});
+  
+          if (data[0]) {
+            var objUser = await CallAPILine(
+              'get',
+              `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+            );
+  
+            var obj = {
+              product: data[0],
+              user:{
+                _id: context.session.user.id,
+                username: objUser.data.displayName,
+              },
+              quantity: 1,
+              payment: data[0].price * 1,
+              ispaid: false,
+              createddate: dateNow
+            };
+  
+            var isSuccess = await MongoInsert(obj, "transaction");
+  
+            if(isSuccess)
+              await context.sendText(`Order ${inputText} thành công, tiền cần thanh toán ${obj.payment}đ`);
+            else
+            await context.sendText(`Lỗi xử lý!`);
+          }else{
+            await context.sendText(`Nói gì zậy?`);
+          }
+  
+          break;
+      }
     }
+  } catch (error) {
+    console.log(error);
   }
 };
