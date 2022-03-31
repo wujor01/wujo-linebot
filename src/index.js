@@ -127,12 +127,12 @@ module.exports = async function App(context) {
           })
 
           listGroup.forEach(item => {
-            txt += `order ${item.length} ${item[0].product.productname} giá bán ${item[0].product.price}\n`
+            txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
           });
           
           if(txt){
             var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
-            txt += `Tiền cần thanh toán: ${totalMoney}`;
+            txt += `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
             await context.sendText(txt);
           }
           else
