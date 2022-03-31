@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
-var groupBy = require('lodash/groupBy');
+var _ = require('lodash');
 var url = process.env.MONGODB_CONNECTION;
 
 Date.prototype.addHours = function(h) {
@@ -117,7 +117,7 @@ module.exports = async function App(context) {
           var listorder = await MongoFindQuery(objFilter, "order",{});
           var txt = '';
           
-          var results = groupBy(listorder, function(n) {
+          var results = _.groupBy(listorder, function(n) {
             return n.product._id;
           });
 
