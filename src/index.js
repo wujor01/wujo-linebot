@@ -114,7 +114,7 @@ module.exports = async function App(context) {
             ]
           };
 
-          console.log(objFilter);
+          console.log(JSON.stringify(objFilter));
 
           var listorder = await MongoFindQuery(objFilter, "transaction",{});
           var txt = '';
