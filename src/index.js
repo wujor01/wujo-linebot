@@ -17,20 +17,17 @@ async function MongoInsert(obj, collection = 'message') {
 
   try {
     var dbo = client.db('mydb');
-    let res = await dbo.collection(collection).insertOne(obj);
-    return res;
+    await dbo.collection(collection).insertOne(obj);
+    return true;
   } catch (err) {
     console.log(err);
+    return false;
   } finally {
     client.close();
   }
 }
 
-async function MongoFindQuery(
-  query,
-  collection = 'bubble',
-  fieldsRemove = { _id: 0 }
-) {
+async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) {
   const client = await MongoClient.connect(url, {
     useNewUrlParser: true,
   }).catch((err) => {
@@ -97,7 +94,29 @@ module.exports = async function App(context) {
         await context.sendFlex('Menu', bodySend);
         break;
       default:
-        await context.sendText(`Nói gì zậy?`);
+        var data = await MongoFindQuery({productname: inputText}, "product",{});
+
+        if (data[0]) {
+          var obj = {
+            productid: data[0]._id,
+            userid: context.session.user.id,
+            quantity: 1,
+            price: data[0].price,
+            payment: data[0].price * 1,
+            ispaid: false,
+            createdate: new Date()
+          };
+
+          var isSuccess = await MongoInsert(obj, "transaction");
+
+          if(isSuccess)
+            await context.sendText(`Order ${inputText} thành công, tiền cần thanh toán ${obj.payment}đ`);
+          else
+          await context.sendText(`Lỗi xử lý!`);
+        }else{
+          await context.sendText(`Nói gì zậy?`);
+        }
+
         break;
     }
   }
