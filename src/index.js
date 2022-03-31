@@ -4,6 +4,11 @@ var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
 var url = process.env.MONGODB_CONNECTION;
 
+Date.prototype.addHours = function(h) {
+  this.setTime(this.getTime() + (h*60*60*1000));
+  return this;
+}
+
 async function MongoInsert(obj, collection = 'message') 
 {
   const client = await MongoClient.connect(url, {
@@ -102,6 +107,9 @@ module.exports = async function App(context) {
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
           );
 
+          var now = new Date();
+          var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+
           var obj = {
             product: data[0],
             user:{
@@ -111,7 +119,7 @@ module.exports = async function App(context) {
             quantity: 1,
             payment: data[0].price * 1,
             ispaid: false,
-            createdate: new Date()
+            createdate: utc.addHours(7)
           };
 
           var isSuccess = await MongoInsert(obj, "transaction");
