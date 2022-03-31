@@ -77,20 +77,6 @@ async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/pro
   }
 }
 
-function groupBy(list, keyGetter) {
-  const map = new Map();
-  list.forEach((item) => {
-       const key = keyGetter(item);
-       const collection = map.get(key);
-       if (!collection) {
-           map.set(key, [item]);
-       } else {
-           collection.push(item);
-       }
-  });
-  return map;
-}
-
 module.exports = async function App(context) {
   try {
     if (context.event.isText) {
@@ -129,9 +115,6 @@ module.exports = async function App(context) {
           };
 
           var listorder = await MongoFindQuery(objFilter, "transaction",{});
-
-          const listorderGroup = groupBy(listorder, item => item.product);
-          console.log(JSON.stringify(listorderGroup)); 
           var txt = '';
   
           listorder.forEach(item => {
