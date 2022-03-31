@@ -198,13 +198,13 @@ module.exports = async function App(context) {
         case 'payment':
           var listorder = await GetOrderInDay(dateNow);
           var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
-          await context.sendConfirmTemplate('Thanh toán order', {
+          await context.sendConfirmTemplate('Thanh toán', {
             type: "confirm",
               actions: [
                 {
                   type: "message",
                   label: "Yes",
-                  text: "cofirm order"
+                  text: "confirm"
                 },
                 {
                   "type": "message",
@@ -216,7 +216,7 @@ module.exports = async function App(context) {
           });
 
           break;
-        case 'cofirm order':
+        case 'confirm':
           var objUser = await CallAPILine(
             'get',
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
