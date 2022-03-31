@@ -120,6 +120,7 @@ async function ConfirmOrder(dateNow, userid, username)
       {ispaid : false}
     ]};
     var newvalues = {$set: {ispaid: true} };
+    console.log(JSON.stringify(myquery));
 
     await dbo.collection("order").updateMany(myquery, newvalues);
 
