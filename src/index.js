@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint-disable prettier/prettier */
 var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
@@ -88,28 +89,7 @@ async function GetOrderInDay(dateNow){
     ]
   };
 
-  var listorder = await MongoFindQuery(objFilter, "order",{});
-  var txt = '';
-  
-  var results = _.groupBy(listorder, function(n) {
-    return n.product._id;
-  });
-
-  var listGroup = [];
-  Object.keys(results).forEach(key => {
-    listGroup.push(results[key]);
-  })
-
-  listGroup.forEach(item => {
-    txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
-  });
-  
-  if(txt){
-    var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
-    txt += `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
-  }
-
-  return txt;
+  return await MongoFindQuery(objFilter, "order",{});
 }
 
 module.exports = async function App(context) {
@@ -139,15 +119,43 @@ module.exports = async function App(context) {
           await context.sendFlex('Menu', bodySend);
           break;
         case 'order':
-          var txt = await GetOrderInDay(dateNow);
-  
-          if(txt)
+          var listorder = await GetOrderInDay(dateNow);
+          var txt = '';
+          
+          var results = _.groupBy(listorder, function(n) {
+            return n.product._id;
+          });
+          var listGroup = [];
+          Object.keys(results).forEach(key => {
+            listGroup.push(results[key]);
+          })
+          listGroup.forEach(item => {
+            txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
+          });
+          
+          if(txt){
+            var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+            txt += `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
             await context.sendText(txt);
+          }
           else
             await context.sendText("Không có giao dịch trong ngày cần thanh toán");
 
           break;
         case 'payment':
+          var listorder = await GetOrderInDay(dateNow);
+          var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+          await context.sendConfirmTemplate('Thanh toán order', {
+            type: "confirm",
+              actions: [
+                {
+                  type: "message",
+                  label: "Thanh toán",
+                  text: "cofirm order"
+                }
+              ],
+              text: `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`
+          });
 
           break;
         default:
