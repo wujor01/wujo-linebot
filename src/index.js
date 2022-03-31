@@ -4,7 +4,8 @@ var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
 var url = process.env.MONGODB_CONNECTION;
 
-async function MongoInsert(obj, collection = 'message') {
+async function MongoInsert(obj, collection = 'message') 
+{
   const client = await MongoClient.connect(url, {
     useNewUrlParser: true,
   }).catch((err) => {
@@ -27,7 +28,8 @@ async function MongoInsert(obj, collection = 'message') {
   }
 }
 
-async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) {
+async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) 
+{
   const client = await MongoClient.connect(url, {
     useNewUrlParser: true,
   }).catch((err) => {
@@ -53,10 +55,8 @@ async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id
   }
 }
 
-async function CallAPILine(
-  method = 'get',
-  url = 'https://api.line.me/v2/bot/profile/Uf072abc9505c04336bb29af8ae9c1a11'
-) {
+async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/profile/Uf072abc9505c04336bb29af8ae9c1a11') 
+{
   try {
     var config = {
       method: method,
@@ -97,9 +97,15 @@ module.exports = async function App(context) {
         var data = await MongoFindQuery({productname: inputText}, "product",{});
 
         if (data[0]) {
+          var objUser = await CallAPILine(
+            'get',
+            `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+          );
+
           var obj = {
             productid: data[0]._id,
             userid: context.session.user.id,
+            username: objUser.data.displayName,
             quantity: 1,
             price: data[0].price,
             payment: data[0].price * 1,
