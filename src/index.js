@@ -121,9 +121,12 @@ module.exports = async function App(context) {
             return n.product._id;
           });
 
-          console.log(JSON.stringify(results));
+          var listGroup = [];
+          Object.keys(results).forEach(key => {
+            listGroup.push(results[key]);
+          })
 
-          results.forEach(item => {
+          listGroup.forEach(item => {
             txt += `order ${item.length} ${item[0].product.productname} giá bán ${item[0].product.price}\n`
           });
           
