@@ -105,10 +105,11 @@ module.exports = async function App(context) {
           break;
         case 'danh sách cần thanh toán':
           dateNow.setHours(0,0,0,0);
+          var fromdate = dateNow;
           var todate = dateNow.addHours(24);
           var objFilter = {
               $and: [
-              {createddate : {$gte : dateNow}},
+              {createddate : {$gte : fromdate}},
               {createddate : {$lt : todate}},
               {ispaid : false}
             ]
