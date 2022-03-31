@@ -105,13 +105,19 @@ module.exports = async function App(context) {
       case 'danh sách cần thanh toán':
         dateNow.setHour(0,0,0,0);
         
-        var listorder = await MongoFindQuery({
+        var objFilter = {
             $and: [
             {createddate : {$gte : dateNow}},
             {createddate : {$lte : dateNow.addHours(24)}},
             {ispaid : false}
           ]
-        }, "product",{});
+        };
+
+        console.log(objFilter);
+
+        var listorder = await MongoFindQuery(objFilter, "transaction",{});
+
+        console.log(listorder);
 
         var txt = '';
 
