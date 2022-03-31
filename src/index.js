@@ -131,7 +131,7 @@ module.exports = async function App(context) {
           var listorder = await MongoFindQuery(objFilter, "transaction",{});
 
           const listorderGroup = groupBy(listorder, item => item.product);
-          console.log(listorderGroup);
+          console.log(JSON.stringify(listorderGroup));
           var txt = '';
   
           listorder.forEach(item => {
