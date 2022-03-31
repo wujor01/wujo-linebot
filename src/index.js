@@ -104,8 +104,7 @@ module.exports = async function App(context) {
           await context.sendFlex('Menu', bodySend);
           break;
         case 'danh sách cần thanh toán':
-          dateNow.setHours(0,0,0,0);
-          var fromdate = dateNow;
+          var fromdate = new Date(dateNow.setHours(0,0,0,0));
           var todate = dateNow.addHours(24);
           var objFilter = {
               $and: [
