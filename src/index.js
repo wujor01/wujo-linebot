@@ -113,6 +113,9 @@ module.exports = async function App(context) {
               {ispaid : false}
             ]
           };
+
+          console.log(objFilter);
+
           var listorder = await MongoFindQuery(objFilter, "transaction",{});
           var txt = '';
   
