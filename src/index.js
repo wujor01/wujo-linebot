@@ -78,14 +78,14 @@ async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/pro
   }
 }
 
-async function GetOrderInDay(dateNow){
+async function GetOrderInDay(dateNow, ispaid = false){
   var fromdate = new Date(dateNow.setHours(0,0,0,0));
   var todate = dateNow.addHours(24);
   var objFilter = {
       $and: [
       {createddate : {$gte : fromdate}},
       {createddate : {$lt : todate}},
-      {ispaid : false}
+      {ispaid : ispaid}
     ]
   };
 
@@ -114,6 +114,17 @@ async function ConfirmOrder(dateNow, userid, username)
     var now = new Date();
     var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
     dateNow = utc.addHours(7);
+    var objInsert = {
+      user: {
+        userid: userid,
+        username: username
+      },
+      orders: listorder,
+      totalMoney: totalMoney,
+      createddate: dateNow
+    };
+    await dbo.collection("payment").insertOne(objInsert);
+    
     var fromdate = new Date(dateNow.setHours(0,0,0,0));
     var todate = dateNow.addHours(24);
 
@@ -123,24 +134,14 @@ async function ConfirmOrder(dateNow, userid, username)
       {createddate : {$lt : todate}},
       {ispaid : false}
     ]};
-    var newvalues = {$set: {ispaid: true} };
+
+    var newvalues = {$set: {ispaid: true, orderid: objInsert._id} };
     console.log(JSON.stringify(myquery));
 
     await dbo.collection("order").updateMany(myquery, newvalues);
+    var totalMoney = objInsert.totalMoney;
 
-    now = new Date();
-    utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
-
-    await dbo.collection("payment").insertOne({
-      user: {
-        userid: userid,
-        username: username
-      },
-      orders: listorder,
-      totalMoney: totalMoney,
-      createddate: utc.addHours(7)
-    });
+    
     return totalMoney;
   } catch (err) {
     console.log(err);
@@ -232,6 +233,32 @@ module.exports = async function App(context) {
             await context.sendText(`${objUser.data.displayName} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
           else
           await context.sendText('Thanh toán không thành công!');
+
+          break;
+        case 'order paid':
+          var listorder = await GetOrderInDay(dateNow, true);
+          var txt = '';
+          
+          var results = _.groupBy(listorder, function(n) {
+            return n.product._id;
+          });
+          var listGroup = [];
+          Object.keys(results).forEach(key => {
+            listGroup.push(results[key]);
+          })
+          listGroup.forEach(item => {
+            txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
+          });
+          
+          if(txt){
+            var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+            txt += `Tiền đã thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
+
+            var data = await MongoFindQuery({productname: inputText}, "payment",{});
+            await context.sendText(txt);
+          }
+          else
+            await context.sendText("Không có giao dịch trong ngày đã thanh toán");
 
           break;
         default:
