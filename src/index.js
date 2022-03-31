@@ -92,6 +92,59 @@ async function GetOrderInDay(dateNow){
   return await MongoFindQuery(objFilter, "order",{});
 }
 
+async function ConfirmOrder(dateNow, userid, username) 
+{
+  var listorder = await GetOrderInDay(dateNow);
+  if(listorder.length == 0)
+    return;
+
+  var fromdate = new Date(dateNow.setHours(0,0,0,0));
+  var todate = dateNow.addHours(24);
+
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+
+  try {
+    var dbo = client.db('mydb');
+    var myquery = {
+      $and: [
+      {createddate : {$gte : fromdate}},
+      {createddate : {$lt : todate}},
+      {ispaid : false}
+    ]};
+    var newvalues = {$set: {ispaid: true} };
+
+    await dbo.collection("order").updateMany(myquery, newvalues);
+
+    var now = new Date();
+    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+
+    await dbo.collection("payment").insertOne({
+      user: {
+        userid: userid,
+        username: username
+      },
+      orders: listorder,
+      totalMoney: totalMoney,
+      createddate: utc.addHours(7)
+    });
+    return totalMoney;
+  } catch (err) {
+    console.log(err);
+    return;
+  } finally {
+    client.close();
+  }
+}
+
 module.exports = async function App(context) {
   try {
     if (context.event.isText) {
@@ -150,13 +203,31 @@ module.exports = async function App(context) {
               actions: [
                 {
                   type: "message",
-                  label: "Thanh toán",
+                  label: "Yes",
                   text: "cofirm order"
+                },
+                {
+                  "type": "message",
+                  "label": "No",
+                  "text": "No"
                 }
               ],
-              text: `Tiền cần thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`
+              text: `Thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`
           });
 
+          break;
+        case 'cofirm order':
+          var objUser = await CallAPILine(
+            'get',
+            `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+          );
+
+          var result = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName);
+          if(result)
+            await context.sendText(`${objUser.data.displayName} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
+          else
+          await context.sendText('Thanh toán không thành công!');
+          
           break;
         default:
           var data = await MongoFindQuery({productname: inputText}, "product",{});
