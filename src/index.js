@@ -81,6 +81,10 @@ module.exports = async function App(context) {
   if (context.event.isText) {
     var inputText = context.event.text.toLowerCase();
 
+    var now = new Date();
+    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    var dateNow = utc.addHours(7);
+
     switch (inputText) {
       case 'chào':
         var res = await CallAPILine(
@@ -98,6 +102,28 @@ module.exports = async function App(context) {
 
         await context.sendFlex('Menu', bodySend);
         break;
+      case 'danh sách cần thanh toán':
+        dateNow.setHour(0,0,0,0);
+        
+        var listorder = await MongoFindQuery({
+            $and: [
+            {createddate : {$gte : dateNow}},
+            {createddate : {$lte : dateNow.addHours(24)}},
+            {ispaid : false}
+          ]
+        }, "product",{});
+
+        var txt = '';
+
+        listorder.forEach(item => {
+          txt += `${item.user.username} order ${item.product.productname} giá ${item.product.price}\n`
+        });
+        if(txt)
+          await context.sendText(txt);
+        else
+          await context.sendText("Không có giao dịch trong ngày cần thanh toán");
+
+        break;
       default:
         var data = await MongoFindQuery({productname: inputText}, "product",{});
 
@@ -106,9 +132,6 @@ module.exports = async function App(context) {
             'get',
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
           );
-
-          var now = new Date();
-          var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
 
           var obj = {
             product: data[0],
@@ -119,7 +142,7 @@ module.exports = async function App(context) {
             quantity: 1,
             payment: data[0].price * 1,
             ispaid: false,
-            createddate: utc.addHours(7)
+            createddate: dateNow
           };
 
           var isSuccess = await MongoInsert(obj, "transaction");
