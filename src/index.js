@@ -103,7 +103,7 @@ module.exports = async function App(context) {
   
           await context.sendFlex('Menu', bodySend);
           break;
-        case 'danh sách cần thanh toán':
+        case 'ds order':
           var fromdate = new Date(dateNow.setHours(0,0,0,0));
           var todate = dateNow.addHours(24);
           var objFilter = {
@@ -116,12 +116,21 @@ module.exports = async function App(context) {
 
           var listorder = await MongoFindQuery(objFilter, "transaction",{});
           var txt = '';
-  
-          listorder.forEach(item => {
-            txt += `${item.user.username} order ${item.quantity}x${item.product.productname} giá ${item.product.price}\n`
+          
+          var results = listorder.reduce(function(results, org) {
+            (results[org.product] = results[org.product] || []).push(org);
+            return results;
+          }, {});
+
+          results.forEach(item => {
+            txt += `order ${item.length} ${item[0].product.productname} giá bán ${item[0].product.price}\n`
           });
-          if(txt)
+          
+          if(txt){
+            var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+            txt += `Tiền cần thanh toán: ${totalMoney}`;
             await context.sendText(txt);
+          }
           else
             await context.sendText("Không có giao dịch trong ngày cần thanh toán");
   
