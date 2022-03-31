@@ -104,11 +104,11 @@ module.exports = async function App(context) {
           await context.sendFlex('Menu', bodySend);
           break;
         case 'danh sách cần thanh toán':
-          var fromdate = dateNow.setHours(0,0,0,0);
+          dateNow.setHours(0,0,0,0);
           var todate = dateNow.addHours(24);
           var objFilter = {
               $and: [
-              {createddate : {$gte : fromdate}},
+              {createddate : {$gte : dateNow}},
               {createddate : {$lt : todate}},
               {ispaid : false}
             ]
