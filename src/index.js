@@ -78,23 +78,24 @@ async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/pro
   }
 }
 
-async function GetOrderInDay(dateNow, ispaid = false){
+async function GetOrderInDay(dateNow, ispaid, lineid){
   var fromdate = new Date(dateNow.setHours(0,0,0,0));
   var todate = dateNow.addHours(24);
   var objFilter = {
       $and: [
       {createddate : {$gte : fromdate}},
       {createddate : {$lt : todate}},
-      {ispaid : ispaid}
+      {ispaid : ispaid},
+      {lineid : lineid}
     ]
   };
 
   return await MongoFindQuery(objFilter, "order",{});
 }
 
-async function ConfirmOrder(dateNow, userid, username) 
+async function ConfirmOrder(dateNow, userid, username, lineid) 
 {
-  var listorder = await GetOrderInDay(dateNow);
+  var listorder = await GetOrderInDay(dateNow, false, lineid);
   if(listorder.length == 0)
     return;
 
@@ -177,7 +178,7 @@ module.exports = async function App(context) {
           await context.sendFlex('Menu', bodySend);
           break;
         case 'order':
-          var listorder = await GetOrderInDay(dateNow);
+          var listorder = await GetOrderInDay(dateNow, false, context.session.id);
           var txt = '';
           
           var results = _.groupBy(listorder, function(n) {
@@ -201,7 +202,7 @@ module.exports = async function App(context) {
 
           break;
         case 'payment':
-          var listorder = await GetOrderInDay(dateNow);
+          var listorder = await GetOrderInDay(dateNow, false, context.session.id);
           var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
           await context.sendConfirmTemplate('Thanh toán', {
             type: "confirm",
@@ -227,7 +228,7 @@ module.exports = async function App(context) {
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
           );
 
-          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName);
+          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName, context.session.id);
           if(totalMoney)
             await context.sendText(`${objUser.data.displayName} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
           else
@@ -235,7 +236,7 @@ module.exports = async function App(context) {
 
           break;
         case 'order paid':
-          var listorder = await GetOrderInDay(dateNow, true);
+          var listorder = await GetOrderInDay(dateNow, true, context.session.id);
           var txt = '';
           
           var results = _.groupBy(listorder, function(n) {
@@ -270,6 +271,7 @@ module.exports = async function App(context) {
             );
   
             var obj = {
+              lineid: context.session.id,
               product: data[0],
               user:{
                 _id: context.session.user.id,
