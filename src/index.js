@@ -2,6 +2,7 @@
 /* eslint-disable prettier/prettier */
 var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
+var mongo = require('mongodb');
 var _ = require('lodash');
 var url = process.env.MONGODB_CONNECTION;
 
@@ -245,7 +246,7 @@ module.exports = async function App(context) {
       objUser.username = res.data.displayName;
 
       await MongoUpdate(
-        {_id: context.session._id}, 
+        {_id: new mongo.ObjectID(context.session._id)}, 
         {user: objUser}, 
         "sessions", 
         "test");
