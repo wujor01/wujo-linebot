@@ -2,8 +2,8 @@
 /* eslint-disable prettier/prettier */
 var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectId;
 var _ = require('lodash');
-const { ObjectId } = require('mongodb');
 var url = process.env.MONGODB_CONNECTION;
 
 //#region Hàm +- ngày tháng
@@ -93,9 +93,7 @@ async function MongoUpdate(query, newvalues, collection, database)
   try {
     var dbo = client.db(database);
     if(query._id){
-      var query = { _id: new ObjectId("624701af3f3261c9fb29170d") };
-      console.log(query);
-      console.log({$set: newvalues });
+      var query = { _id: new ObjectId(query._id) };
       await dbo.collection(collection).updateOne(query, {$set: newvalues });
     }
     else
@@ -109,9 +107,6 @@ async function MongoUpdate(query, newvalues, collection, database)
     client.close();
   }
 }
-
-MongoUpdate();
-
 async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) 
 {
   const client = await MongoClient.connect(url, {
@@ -182,11 +177,14 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
       {lineid : lineid}
     ]
   };
+
+  console.log(JSON.stringify(objFilter));
+
   return await MongoFindQuery(objFilter, "order",{});
 }
 
 
-async function ConfirmOrder(dateNow, objUser, lineid) 
+async function ConfirmOrder(dateNow, userid, username, lineid) 
 {
   var listorder = await GetOrderInDay(dateNow, false, lineid);
   if(listorder.length == 0)
@@ -210,7 +208,10 @@ async function ConfirmOrder(dateNow, objUser, lineid)
     dateNow = utc.addHours(7);
     var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);;
     var objInsert = {
-      user: objUser,
+      user: {
+        userid: userid,
+        username: username
+      },
       orders: listorder,
       totalMoney: totalMoney,
       createddate: dateNow
@@ -243,29 +244,6 @@ async function ConfirmOrder(dateNow, objUser, lineid)
 
 module.exports = async function App(context) {
   try {
-    //Lần đầu chat update thông tin username vào db
-    if (!context.session.user.username) {
-      var res = await CallAPILine(
-        'get',
-        `https://api.line.me/v2/bot/profile/${context.session.user.id}`
-      );
-
-      let objUser = {
-        id: context.session.user.id,
-        username: res.data.displayName,
-        _updatedAt: context.session.user._updatedAt
-      };
-
-      console.log(JSON.stringify(objUser));
-      console.log(res.data.displayName);
-
-      await MongoUpdate(
-        {_id : context.session._id},
-        {user: objUser}, 
-        "sessions", 
-        "test");
-    }
-
     if (context.event.isText) {
       var inputText = context.event.text.toLowerCase();
   
@@ -275,7 +253,11 @@ module.exports = async function App(context) {
   
       switch (inputText) {
         case 'chào':
-          await context.sendText(`Chao xìn ${context.session.user.username}!`);
+          var res = await CallAPILine(
+            'get',
+            `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+          );
+          await context.sendText(`Chao xìn ${res.data.displayName}!`);
           break;
         case 'menu':
           var listBundle = await MongoFindQuery({}, 'bubble');
@@ -332,9 +314,14 @@ module.exports = async function App(context) {
 
           break;
         case 'confirm':
-          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, context.session.user.username, context.session.id);
+          var objUser = await CallAPILine(
+            'get',
+            `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+          );
+
+          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName, context.session.id);
           if(totalMoney)
-            await context.sendText(`${context.session.user.username} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
+            await context.sendText(`${objUser.data.displayName} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
           else
           await context.sendText('Thanh toán không thành công!');
 
@@ -402,11 +389,18 @@ module.exports = async function App(context) {
           var data = await MongoFindQuery({productname: inputText}, "product",{});
   
           if (data[0]) {
+            var objUser = await CallAPILine(
+              'get',
+              `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+            );
   
             var obj = {
               lineid: context.session.id,
               product: data[0],
-              user: context.session.user,
+              user:{
+                _id: context.session.user.id,
+                username: objUser.data.displayName,
+              },
               quantity: 1,
               payment: data[0].price * 1,
               ispaid: false,
