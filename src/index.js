@@ -137,6 +137,8 @@ async function GetOrderInDay(dateNow, ispaid, lineid){
 }
 
 async function GetOrderInMonth(year, month, ispaid, lineid){
+  month = parseInt(month) - 1;//js 0 là tháng 1
+
   var objFilter = {
       $and: [
       {createddate : {$gte : new Date(year, month, 1)}},
