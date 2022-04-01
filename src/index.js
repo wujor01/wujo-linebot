@@ -92,9 +92,12 @@ async function MongoUpdate(query, newvalues, collection, database)
 
   try {
     var dbo = client.db(database);
-    console.log(JSON.stringify(query));
-    console.log(JSON.stringify(newvalues));
-    await dbo.collection(collection).updateMany(query, {$set: newvalues });
+
+    if(query._id)
+      await dbo.collection(collection).updateMany({'_id': new mongo.ObjectID(query._id)}, {$set: newvalues });
+    else
+      await dbo.collection(collection).updateMany(query, {$set: newvalues });
+
     return true;
   } catch (err) {
     console.log(err);
@@ -245,15 +248,8 @@ module.exports = async function App(context) {
       var objUser = context.session.user;
       objUser.username = res.data.displayName;
 
-      var o_id = new mongo.ObjectID(context.session._id);
-      var query = {};
-      query._id = o_id;
-
-      console.log(o_id);
-      console.log(query._id);
-
       await MongoUpdate(
-        query,
+        {_id : context.session._id},
         {user: objUser}, 
         "sessions", 
         "test");
