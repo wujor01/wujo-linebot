@@ -77,6 +77,30 @@ async function MongoInsert(obj, collection = 'message')
   }
 }
 
+async function MongoUpdate(query, newvalues, collection, database) 
+{
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+
+  try {
+    var dbo = client.db(database);
+    await dbo.collection(collection).updateMany(query, {$set: newvalues });
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  } finally {
+    client.close();
+  }
+}
+
 async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) 
 {
   const client = await MongoClient.connect(url, {
@@ -151,7 +175,7 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
 }
 
 
-async function ConfirmOrder(dateNow, userid, username, lineid) 
+async function ConfirmOrder(dateNow, objUser, lineid) 
 {
   var listorder = await GetOrderInDay(dateNow, false, lineid);
   if(listorder.length == 0)
@@ -175,10 +199,7 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
     dateNow = utc.addHours(7);
     var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);;
     var objInsert = {
-      user: {
-        userid: userid,
-        username: username
-      },
+      user: objUser,
       orders: listorder,
       totalMoney: totalMoney,
       createddate: dateNow
@@ -211,7 +232,20 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
 
 module.exports = async function App(context) {
   try {
-    console.log(JSON.stringify(context.session));
+    //Lần đầu chat update thông tin username vào db
+    if (!context.session.user.username) {
+      var res = await CallAPILine(
+        'get',
+        `https://api.line.me/v2/bot/profile/${context.session.user.id}`
+      );
+
+      await MongoUpdate(
+        {_id: context.session._id}, 
+        {user: {username : res.data.displayName}}, 
+        "sessions", 
+        "test");
+    }
+
     if (context.event.isText) {
       var inputText = context.event.text.toLowerCase();
   
@@ -221,11 +255,7 @@ module.exports = async function App(context) {
   
       switch (inputText) {
         case 'chào':
-          var res = await CallAPILine(
-            'get',
-            `https://api.line.me/v2/bot/profile/${context.session.user.id}`
-          );
-          await context.sendText(`Chao xìn ${res.data.displayName}!`);
+          await context.sendText(`Chao xìn ${context.session.user.username}!`);
           break;
         case 'menu':
           var listBundle = await MongoFindQuery({}, 'bubble');
@@ -282,14 +312,9 @@ module.exports = async function App(context) {
 
           break;
         case 'confirm':
-          var objUser = await CallAPILine(
-            'get',
-            `https://api.line.me/v2/bot/profile/${context.session.user.id}`
-          );
-
-          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, objUser.data.displayName, context.session.id);
+          var totalMoney = await ConfirmOrder(dateNow, context.session.user.id, context.session.user.username, context.session.id);
           if(totalMoney)
-            await context.sendText(`${objUser.data.displayName} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
+            await context.sendText(`${context.session.user.username} đã thanh toán ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`);
           else
           await context.sendText('Thanh toán không thành công!');
 
@@ -357,18 +382,11 @@ module.exports = async function App(context) {
           var data = await MongoFindQuery({productname: inputText}, "product",{});
   
           if (data[0]) {
-            var objUser = await CallAPILine(
-              'get',
-              `https://api.line.me/v2/bot/profile/${context.session.user.id}`
-            );
   
             var obj = {
               lineid: context.session.id,
               product: data[0],
-              user:{
-                _id: context.session.user.id,
-                username: objUser.data.displayName,
-              },
+              user: context.session.user,
               quantity: 1,
               payment: data[0].price * 1,
               ispaid: false,
