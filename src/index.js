@@ -378,7 +378,7 @@ module.exports = async function App(context) {
               return;
             }
 
-            txt = `DS order coofee tháng ${month}-${year}\n` + txt;
+            txt = `DS order coffee tháng ${month}-${year}\n` + txt;
             var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
             txt += `Tổng tiền thanh toán: ${totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`;
             await context.sendText(txt);
