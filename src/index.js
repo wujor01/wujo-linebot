@@ -250,10 +250,14 @@ module.exports = async function App(context) {
         `https://api.line.me/v2/bot/profile/${context.session.user.id}`
       );
 
-      let objUser = context.session.user;
-      objUser.username = res.data.displayName;
+      let objUser = {
+        id: context.session.user.id,
+        username: res.data.displayName,
+        _updatedAt: context.session.user._updatedAt
+      };
 
       console.log(JSON.stringify(objUser));
+      console.log(res.data.displayName);
 
       await MongoUpdate(
         {_id : context.session._id},
