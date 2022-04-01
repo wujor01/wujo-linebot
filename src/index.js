@@ -3,7 +3,7 @@
 var axios = require('axios');
 var MongoClient = require('mongodb').MongoClient;
 var _ = require('lodash');
-const { ObjectID } = require('mongodb');
+const { ObjectId } = require('mongodb');
 var url = process.env.MONGODB_CONNECTION;
 
 //#region Hàm +- ngày tháng
@@ -94,7 +94,7 @@ async function MongoUpdate(query, newvalues, collection, database)
     var dbo = client.db(database);
 
     if(query._id)
-      await dbo.collection(collection).update({'_id': ObjectID(query._id)}, {$set: newvalues });
+      await dbo.collection(collection).updateOne({'_id': ObjectId(query._id)}, {$set: newvalues });
     else
       await dbo.collection(collection).updateMany(query, {$set: newvalues });
 
