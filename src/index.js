@@ -95,7 +95,7 @@ async function MongoUpdate(query, newvalues, collection, database)
 
     var data = await dbo.collection(collection).find({}).toArray();
 
-    console.log(JSON.parse(data));
+    console.log(JSON.stringify(data));
 
     if(query._id){
       var o_id = new ObjectId(query._id);
