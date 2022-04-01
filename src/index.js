@@ -340,7 +340,7 @@ module.exports = async function App(context) {
             var txt = '';
 
             listorder.forEach(item => {
-              txt += `${item.createddate.toVNDateString()}: ${item.user.username} order ${item.product.productname} giá ${item.product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}`
+              txt += `${item.createddate.toVNDateString()}: ${item.user.username} order ${item.product.productname} giá ${item.product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
             });
 
             if (!txt) {
