@@ -147,9 +147,6 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
       {lineid : lineid}
     ]
   };
-
-  console.log(JSON.stringify(objFilter));
-
   return await MongoFindQuery(objFilter, "order",{});
 }
 
@@ -214,6 +211,7 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
 
 module.exports = async function App(context) {
   try {
+    console.log(JSON.stringify(context.session));
     if (context.event.isText) {
       var inputText = context.event.text.toLowerCase();
   
