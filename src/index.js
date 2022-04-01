@@ -245,8 +245,12 @@ module.exports = async function App(context) {
       var objUser = context.session.user;
       objUser.username = res.data.displayName;
 
+      var o_id = new mongo.ObjectID(context.session._id);
+      
+      console.log(o_id);
+
       await MongoUpdate(
-        {_id: new mongo.ObjectID(context.session._id)}, 
+        {_id: o_id}, 
         {user: objUser}, 
         "sessions", 
         "test");
