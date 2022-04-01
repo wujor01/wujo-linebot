@@ -91,6 +91,8 @@ async function MongoUpdate(query, newvalues, collection, database)
 
   try {
     var dbo = client.db(database);
+    console.log(JSON.stringify(query));
+    console.log(JSON.stringify(newvalues));
     await dbo.collection(collection).updateMany(query, {$set: newvalues });
     return true;
   } catch (err) {
