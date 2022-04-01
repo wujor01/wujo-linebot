@@ -93,7 +93,7 @@ async function MongoUpdate(query, newvalues, collection, database)
   try {
     var dbo = client.db(database);
     if(query._id){
-      var query = { _id: new ObjectId(query._id) };
+      var query = { _id: new ObjectId("624701af3f3261c9fb29170d") };
       console.log(query);
       console.log({$set: newvalues });
       await dbo.collection(collection).updateOne(query, {$set: newvalues });
