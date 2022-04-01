@@ -93,7 +93,7 @@ async function MongoUpdate(query, newvalues, collection, database)
   try {
     var dbo = client.db(database);
 
-    var data = await dbo.collection(collection).find({});
+    var data = await dbo.collection(collection).find({}).toArray();
 
     console.log(JSON.parse(data));
 
