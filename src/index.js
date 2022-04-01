@@ -327,7 +327,7 @@ module.exports = async function App(context) {
             var yearmonth = inputText.split('order')[1].trim();
 
             var year = yearmonth.slice(0,4);
-            var month = yearmonth.slice(4,6);
+            var month = parseInt(yearmonth.slice(4,6)) - 1;
 
             if(!year || !month){
               await context.sendText(`Năm tháng không đúng định dạng (yyyyMM)!`);
