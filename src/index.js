@@ -400,7 +400,7 @@ module.exports = async function App(context) {
           if(numOrder == 0)
             await context.sendText('Bạn chưa có order nào trong ngày hôm nay chưa thanh toán');
           else
-            await context.sendText(`Xóa thành công ${numOrder} order của bạn trong ngày hôm nay`);
+            await context.sendText(`Hủy thành công ${numOrder} order của bạn trong ngày hôm nay`);
 
           break;
         default:
