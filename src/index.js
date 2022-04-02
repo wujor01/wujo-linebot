@@ -393,9 +393,9 @@ module.exports = async function App(context) {
             {"user.id" : context.session.user.id}
           ]
           };
-          console.log(JSON.stringify(query), "order");
+          console.log(JSON.stringify(query));
 
-          var numOrder = await MongoDelete(query);
+          var numOrder = await MongoDelete(query, "order");
 
           if(numOrder == 0)
             await context.sendText('Bạn không chưa có order nào trong ngày hôm nay chưa thanh toán');
