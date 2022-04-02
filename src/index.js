@@ -398,7 +398,7 @@ module.exports = async function App(context) {
           var numOrder = await MongoDelete(query, "order");
 
           if(numOrder == 0)
-            await context.sendText('Bạn không chưa có order nào trong ngày hôm nay chưa thanh toán');
+            await context.sendText('Bạn chưa có order nào trong ngày hôm nay chưa thanh toán');
           else
             await context.sendText(`Xóa thành công ${numOrder} order của bạn trong ngày hôm nay`);
 
