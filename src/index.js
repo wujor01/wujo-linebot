@@ -295,6 +295,11 @@ module.exports = async function App(context) {
         case 'payment':
           var listorder = await GetOrderInDay(dateNow, false, context.session.id);
           var totalMoney = listorder.reduce((a,curr) => a + curr.payment, 0);
+          if(totalMoney == 0){
+            await context.sendText('Không có order nào trong ngày hôm nay cần thanh toán');
+            return;
+          }
+
           await context.sendConfirmTemplate('Thanh toán', {
             type: "confirm",
               actions: [
