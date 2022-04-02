@@ -78,7 +78,7 @@ async function MongoInsert(obj, collection = 'message')
   }
 }
 
-async function MongoUpdate(query, newvalues, collection, database) 
+async function MongoUpdate(query, newvalues, database) 
 {
   const client = await MongoClient.connect(url, {
     useNewUrlParser: true,
@@ -94,12 +94,36 @@ async function MongoUpdate(query, newvalues, collection, database)
     var dbo = client.db(database);
     if(query._id){
       var query = { _id: new ObjectId(query._id) };
-      await dbo.collection(collection).updateOne(query, {$set: newvalues });
+      await dbo.collection("mydb").updateOne(query, {$set: newvalues });
     }
     else
-      await dbo.collection(collection).updateMany(query, {$set: newvalues });
+      await dbo.collection("mydb").updateMany(query, {$set: newvalues });
 
     return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  } finally {
+    client.close();
+  }
+}
+
+async function MongoDelete(query, collection) 
+{
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+
+  try {
+    var dbo = client.db("mydb");
+    const result = dbo.collection(collection).deleteMany(query);
+    return result.deletedCount;
   } catch (err) {
     console.log(err);
     return false;
@@ -357,6 +381,28 @@ module.exports = async function App(context) {
             await context.sendText("Không có giao dịch trong ngày đã thanh toán");
 
           break;
+        case 'cancel':
+          var fromdate = new Date(dateNow.setHours(0,0,0,0));
+          var todate = dateNow.addHours(24);
+          var query = {
+            $and: [
+            {createddate : {$gte : fromdate}},
+            {createddate : {$lt : todate}},
+            {ispaid : false},
+            {lineid : context.session.id},
+            {"user.id" : context.session.user.id}
+          ]
+          };
+          console.log(JSON.stringify(query));
+
+          var numOrder = await MongoDelete(query);
+
+          if(numOrder == 0)
+            await context.sendText('Bạn không chưa có order nào trong ngày hôm nay chưa thanh toán');
+          else
+            await context.sendText(`Xóa thành công ${numOrder} order trong ngày hôm nay`);
+
+          break;
         default:
           
           //#region ds order theo tháng
@@ -403,7 +449,7 @@ module.exports = async function App(context) {
               lineid: context.session.id,
               product: data[0],
               user:{
-                _id: context.session.user.id,
+                id: context.session.user.id,
                 username: objUser.data.displayName,
               },
               quantity: 1,
