@@ -393,7 +393,7 @@ module.exports = async function App(context) {
             {"user.id" : context.session.user.id}
           ]
           };
-          console.log(JSON.stringify(query));
+          console.log(JSON.stringify(query), "order");
 
           var numOrder = await MongoDelete(query);
 
