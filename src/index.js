@@ -110,11 +110,9 @@ async function MongoUpdate(query, newvalues, database)
 
 async function MongoDelete(query, collection) 
 {
-  const client = await MongoClient.connect(url, {
-    useNewUrlParser: true,
-  }).catch((err) => {
-    console.log(err);
-  });
+  const client = new MongoClient(url);
+
+  await client.connect();
 
   if (!client) {
     return;
