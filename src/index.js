@@ -129,7 +129,7 @@ async function MongoDelete(query, collection)
     return false;
   } finally {
     client.close();
-  }
+  } 
 }
 async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) 
 {
