@@ -419,7 +419,7 @@ module.exports = async function App(context) {
             else
             await context.sendText(`Lỗi xử lý!`);
           }else{
-            await context.sendText(`Nói gì zậy?`);
+            //await context.sendText(`Nói gì zậy?`);
           }
   
           break;
