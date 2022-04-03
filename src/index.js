@@ -404,15 +404,15 @@ module.exports = async function App(context) {
 
           break;
         case 'help':
-          var lstImagemap = await MongoFindQuery({}, 'imagemap');
-          console.log(JSON.stringify(lstImagemap[0]));
+          var txt = "--Danh sách lệnh--\n";
+          txt+= "'menu': Menu gọi đồ uống\n";
+          txt+= "'order': DS order trong ngày chưa thanh toán\n";
+          txt+= "'payment': Thanh toán các order trong ngày\n";
+          txt+= "'order paid': DS order trong ngày đã thanh toán\n";
+          txt+= "'cancel': Hủy order của bản thân\n";
+          txt+= "'order {yyyyMM}': DS order trong tháng đã thanh toán";
 
-          await context.sendImage({
-            originalContentUrl: 'https://serving.photos.photobox.com/96525600fb56263b17e4fb4221e6b4b5058b89d5d7c42b34a74a9d552933d38474c9afae.jpg',
-            previewImageUrl: 'https://serving.photos.photobox.com/96525600fb56263b17e4fb4221e6b4b5058b89d5d7c42b34a74a9d552933d38474c9afae.jpg',
-          });
-
-          await context.sendImagemap('Help', lstImagemap[0]);
+          await context.sendText(txt);
           break;
         default:
           
