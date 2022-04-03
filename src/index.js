@@ -403,6 +403,10 @@ module.exports = async function App(context) {
             await context.sendText(`Hủy thành công ${numOrder} order của bạn trong ngày hôm nay`);
 
           break;
+        case 'help':
+          var lstImagemap = await MongoFindQuery({}, 'imagemap');
+          await context.sendImagemap('Help', lstImagemap[0]);
+          break;
         default:
           
           //#region ds order theo tháng
