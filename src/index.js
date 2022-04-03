@@ -405,6 +405,7 @@ module.exports = async function App(context) {
           break;
         case 'help':
           var lstImagemap = await MongoFindQuery({}, 'imagemap');
+          console.log(JSON.stringify(lstImagemap[0]));
           await context.sendImagemap('Help', lstImagemap[0]);
           break;
         default:
