@@ -304,7 +304,7 @@ module.exports = async function App(context) {
             listGroup.push(results[key]);
           })
           listGroup.forEach(item => {
-            txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`
+            txt += `${item.length} ${item[0].product.productname} giá bán ${item[0].product.price.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (${item.map(x => x.user.username).join()})\n`
           });
           
           if(txt){
