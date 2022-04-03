@@ -406,6 +406,12 @@ module.exports = async function App(context) {
         case 'help':
           var lstImagemap = await MongoFindQuery({}, 'imagemap');
           console.log(JSON.stringify(lstImagemap[0]));
+
+          await context.sendImage({
+            originalContentUrl: 'https://serving.photos.photobox.com/96525600fb56263b17e4fb4221e6b4b5058b89d5d7c42b34a74a9d552933d38474c9afae.jpg',
+            previewImageUrl: 'https://serving.photos.photobox.com/96525600fb56263b17e4fb4221e6b4b5058b89d5d7c42b34a74a9d552933d38474c9afae.jpg',
+          });
+
           await context.sendImagemap('Help', lstImagemap[0]);
           break;
         default:
