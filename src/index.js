@@ -282,6 +282,10 @@ module.exports = async function App(context) {
             `https://api.line.me/v2/bot/profile/${context.session.user.id}`
           );
           await context.sendText(`Chao xìn ${res.data.displayName}!`);
+          await context.sendSticker({
+            packageId: "11537",
+            stickerId: "52002738"
+          });
           break;
         case 'menu':
           var listBundle = await MongoFindQuery({}, 'bubble');
@@ -396,6 +400,11 @@ module.exports = async function App(context) {
           console.log(JSON.stringify(query));
 
           var numOrder = await MongoDelete(query, "order");
+
+          await context.sendSticker({
+            packageId: "11538",
+            stickerId: "51626530"
+          });
 
           if(numOrder == 0)
             await context.sendText('Bạn chưa có order nào trong ngày hôm nay chưa thanh toán');
