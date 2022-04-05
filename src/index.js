@@ -183,8 +183,9 @@ async function GetOrderInDay(dateNow, ispaid, lineid){
       $and: [
       {createddate : {$gte : fromdate}},
       {createddate : {$lt : todate}},
-      {ispaid : ispaid},
-      {lineid : lineid}
+      {ispaid : ispaid}
+      //Không lấy điều kiện lineid nữa vì chưa tìm được cách add rich menu vào group
+      //{lineid : lineid}
     ]
   };
 
@@ -198,8 +199,9 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
       $and: [
       {createddate : {$gte : new Date(year, month, 1)}},
       {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}},
-      {ispaid : ispaid},
-      {lineid : lineid}
+      {ispaid : ispaid}
+      //Không lấy điều kiện lineid nữa vì chưa tìm được cách add rich menu vào group
+      //{lineid : lineid}
     ]
   };
 
@@ -394,7 +396,8 @@ module.exports = async function App(context) {
             {createddate : {$gte : fromdate}},
             {createddate : {$lt : todate}},
             {ispaid : false},
-            {lineid : context.session.id},
+            //Không lấy điều kiện lineid nữa vì chưa tìm được cách add rich menu vào group
+            //{lineid : context.session.id},
             {"user.id" : context.session.user.id}
           ]
           };
