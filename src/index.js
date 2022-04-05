@@ -435,7 +435,7 @@ module.exports = async function App(context) {
 
             if (yearmonth == 'month') {
               year = new Date().getFullYear();
-              month = '0' + new Date().getMonth() + 1;
+              month = '0' + (new Date().getMonth() + 1);
             }else{
               year = yearmonth.slice(0,4);
               month = yearmonth.slice(4,6);
