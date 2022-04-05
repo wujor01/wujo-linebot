@@ -471,6 +471,7 @@ module.exports = async function App(context) {
 
           var data = await MongoFindQuery({productname: inputText}, "product",{});
   
+          //Order theo productname
           if (data[0]) {
             var objUser = await CallAPILine(
               'get',
