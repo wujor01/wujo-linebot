@@ -226,14 +226,9 @@ async function GetTopPayment(year, month) {
 
   lstGroupByUser.forEach(x => {
     x.totalMoney = 0;
-    x.totalMoneyMyOrder = 0;
     x.username = x.payments[0].user.username;
     x.payments.forEach(payment => {
       x.totalMoney += payment.totalMoney;
-      let listMyOrders = payment.orders.filter(payment => payment.user.userid == x.userid);
-      listMyOrders.forEach(myOrder => {
-        x.totalMoneyMyOrder += myOrder.payment;
-      });
     });
   });
 
@@ -249,13 +244,44 @@ async function GetTopPayment(year, month) {
   };
     var listOrder = await MongoFindQuery(objFilter, "order",{});
 
+    var listUser = [];
+
     lstGroupByUser.forEach(item => {
       item.totalMoneyMyOrder = listOrder.filter(x => x.user.id == item.userid).reduce((a,curr) => a + curr.payment, 0);
+
+      listUser.push({
+        userid: item.userid,
+        username : item.username,
+        totalMoney : item.totalMoney,
+        totalMoneyMyOrder: item.totalMoneyMyOrder
+      });
+
       txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
     });
   }
 
+  var listOrderByUserNotPayment = listOrder.filter(order => listUser.map(user => user.userid).findIndex(x => x == order.user.id) == -1);
+
+  var listGroupByUserNotPayment = _.chain(listOrderByUserNotPayment).groupBy("user.id").map((value, key) => ({ userid: key, orders: value })).value();
   
+  listGroupByUserNotPayment.forEach(item => {
+    item.username = item.orders[0].user.username;
+    item.totalMoney = 0;
+    item.totalMoneyMyOrder = 0;
+    item.orders.forEach(order => {
+      item.totalMoneyMyOrder += order.payment;
+    });
+
+    listUser.push({
+      userid: item.userid,
+      username : item.username,
+      totalMoney : item.totalMoney,
+      totalMoneyMyOrder: item.totalMoneyMyOrder
+    });
+  });
+
+  console.log(JSON.stringify(listUser));
+
   return txt;
 }
 
