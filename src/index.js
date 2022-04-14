@@ -492,31 +492,31 @@ module.exports = async function App(context) {
           }
           //#endregion
 
-          //#region top thanh toán{
-            if(inputText.indexOf('payment') > -1){
-              var yearmonth = inputText.split('payment')[1].trim();
+          //#region top thanh toán
+          if(inputText.indexOf('payment') > -1){
+            var yearmonth = inputText.split('payment')[1].trim();
   
-              var year = '';
-              var month = '';
+            var year = '';
+            var month = '';
   
-              if (yearmonth == 'month') {
-                year = new Date().getFullYear();
-                month = '0' + (new Date().getMonth() + 1);
-              }else{
-                year = yearmonth.slice(0,4);
-                month = yearmonth.slice(4,6);
-              }
+            if (yearmonth == 'month') {
+              year = new Date().getFullYear();
+              month = '0' + (new Date().getMonth() + 1);
+            }else{
+              year = yearmonth.slice(0,4);
+              month = yearmonth.slice(4,6);
+            }
   
-              if(!year || !month){
-                await context.sendText(`Năm tháng không đúng định dạng (yyyyMM)!`);
-                return;
-              }
-  
-              await GetTopPayment(year, month);
-              await context.sendText('OK');
+            if(!year || !month){
+              await context.sendText(`Năm tháng không đúng định dạng (yyyyMM)!`);
               return;
             }
+  
+            await GetTopPayment(year, month);
+            await context.sendText('OK');
+            return;
           }
+          //#endregion
 
           var data = await MongoFindQuery({productname: inputText}, "product",{});
   
