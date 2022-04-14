@@ -217,8 +217,6 @@ async function GetTopPayment(year, month) {
       $and: [
       {createddate : {$gte : new Date(year, month, 1)}},
       {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}}
-      //Không lấy điều kiện lineid nữa vì chưa tìm được cách add rich menu vào group
-      //{lineid : lineid}
     ]
   };
 
@@ -244,9 +242,23 @@ async function GetTopPayment(year, month) {
 
   var txt = '';
 
-  lstGroupByUser.forEach(item => {
-    txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`;
-  });
+  if (lstGroupByUser.length > 0) {
+    objFilter = {
+      $and: [
+      {createddate : {$gte : new Date(year, month, 1)}},
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}},
+      {ispaid : true}
+    ]
+  };
+    var listOrder = await MongoFindQuery(objFilter, "order",{});
+
+    lstGroupByUser.forEach(item => {
+      item.totalMoneyMyOrder = listOrder.filter(x => x.user.username == item.username).reduce((a,curr) => a + curr.payment, 0);
+      txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
+    });
+  }
+
+  
   return txt;
 }
 
