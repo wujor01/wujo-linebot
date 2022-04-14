@@ -223,7 +223,7 @@ async function GetTopPayment(year, month) {
   var listData = await MongoFindQuery(objFilter, "payment",{});
 
   if (listData.length == 0) {
-    return `Không có thông tin danh sách thanh toán của tháng ${month} - ${year}`;
+    return `Không có thông tin danh sách thanh toán của tháng ${month + 1} - ${year}`;
   }
 
   var lstGroupByUser = _.chain(listData).groupBy("user.userid").map((value, key) => ({ userid: key, payments: value })).value();
