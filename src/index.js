@@ -242,7 +242,12 @@ async function GetTopPayment(year, month) {
     });
   });
 
-  console.log(JSON.stringify(lstGroupByUser));
+  var txt = '';
+
+  lstGroupByUser.forEach(item => {
+    txt += `${item.username} thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})}\n`
+  });
+  return txt;
 }
 
 
@@ -524,8 +529,12 @@ module.exports = async function App(context) {
               return;
             }
   
-            await GetTopPayment(year, month);
-            await context.sendText('OK');
+            var txt = await GetTopPayment(year, month);
+            if (!txt) {
+              await context.sendText('Không có danh sách thanh toán');
+            }
+
+            await context.sendText(txt);
             return;
           }
           //#endregion
