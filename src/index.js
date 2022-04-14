@@ -253,6 +253,8 @@ async function GetTopPayment(year, month) {
   };
     var listOrder = await MongoFindQuery(objFilter, "order",{});
 
+    console.log(JSON.stringify(lstGroupByUser));
+
     lstGroupByUser.forEach(item => {
       item.totalMoneyMyOrder = listOrder.filter(x => x.user.userid == item.userid).reduce((a,curr) => a + curr.payment, 0);
       txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
