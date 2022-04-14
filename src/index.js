@@ -463,7 +463,8 @@ module.exports = async function App(context) {
           txt+= "'payment': Thanh toán các order trong ngày\n";
           txt+= "'order paid': DS order trong ngày đã thanh toán\n";
           txt+= "'cancel': Hủy order của bản thân\n";
-          txt+= "'order {yyyyMM}': DS order trong tháng đã thanh toán";
+          txt+= "'order {yyyyMM}': DS order trong tháng đã thanh toán\n";
+          txt+= "'payment {yyyyMM}': DS người thanh toán trong tháng đã thanh toán\n";
 
           await context.sendText(txt);
           break;
