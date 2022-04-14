@@ -228,9 +228,21 @@ async function GetTopPayment(year, month) {
 
   console.log(JSON.stringify(listData));
 
-  var group = _.chain(listData).groupBy("user.userid").map((value, key) => ({ user: key, payments: value })).value();
+  var lstGroupByUser = _.chain(listData).groupBy("user.username").map((value, key) => ({ username: key, payments: value })).value();
 
-  console.log(JSON.stringify(group));
+  lstGroupByUser.forEach(x => {
+    x.totalMoney = 0;
+    x.totalMoneyMyOrder = 0;
+    x.payments.forEach(payment => {
+      x.totalMoney += payment.totalMoney;
+      let listMyOrders = payment.orders.filter(payment => payment.user.username = payment.user);
+      listMyOrders.forEach(myOrder => {
+        x.totalMoneyMyOrder += myOrder.payment;
+      });
+    });
+  });
+
+  console.log(JSON.stringify(lstGroupByUser));
 }
 
 
