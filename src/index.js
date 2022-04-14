@@ -220,12 +220,8 @@ async function GetTopPayment(year, month) {
     ]
   };
 
-  console.log(JSON.stringify(objFilter));
-
   var listData = await MongoFindQuery(objFilter, "payment",{});
-
-  console.log(JSON.stringify(listData));
-
+  
   var lstGroupByUser = _.chain(listData).groupBy("user.userid").map((value, key) => ({ userid: key, payments: value })).value();
 
   lstGroupByUser.forEach(x => {
