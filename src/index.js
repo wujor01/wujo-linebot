@@ -226,14 +226,15 @@ async function GetTopPayment(year, month) {
 
   console.log(JSON.stringify(listData));
 
-  var lstGroupByUser = _.chain(listData).groupBy("user.username").map((value, key) => ({ username: key, payments: value })).value();
+  var lstGroupByUser = _.chain(listData).groupBy("user.userid").map((value, key) => ({ userid: key, payments: value })).value();
 
   lstGroupByUser.forEach(x => {
     x.totalMoney = 0;
     x.totalMoneyMyOrder = 0;
+    x.username = x.payments[0].user.username;
     x.payments.forEach(payment => {
       x.totalMoney += payment.totalMoney;
-      let listMyOrders = payment.orders.filter(payment => payment.user.username == x.username);
+      let listMyOrders = payment.orders.filter(payment => payment.user.userid == x.userid);
       listMyOrders.forEach(myOrder => {
         x.totalMoneyMyOrder += myOrder.payment;
       });
@@ -253,7 +254,7 @@ async function GetTopPayment(year, month) {
     var listOrder = await MongoFindQuery(objFilter, "order",{});
 
     lstGroupByUser.forEach(item => {
-      item.totalMoneyMyOrder = listOrder.filter(x => x.user.username == item.username).reduce((a,curr) => a + curr.payment, 0);
+      item.totalMoneyMyOrder = listOrder.filter(x => x.user.userid == item.userid).reduce((a,curr) => a + curr.payment, 0);
       txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
     });
   }
