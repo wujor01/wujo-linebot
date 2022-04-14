@@ -245,7 +245,7 @@ async function GetTopPayment(year, month) {
   var txt = '';
 
   lstGroupByUser.forEach(item => {
-    txt += `${item.username} thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
+    txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})}\n`;
   });
   return txt;
 }
