@@ -222,6 +222,10 @@ async function GetTopPayment(year, month) {
 
   var listData = await MongoFindQuery(objFilter, "payment",{});
 
+  if (listData.length == 0) {
+    return `Không có thông tin danh sách thanh toán của tháng ${month} - ${year}`;
+  }
+
   var lstGroupByUser = _.chain(listData).groupBy("user.userid").map((value, key) => ({ userid: key, payments: value })).value();
 
   lstGroupByUser.forEach(x => {
@@ -279,7 +283,7 @@ async function GetTopPayment(year, month) {
       total: item.totalMoney - item.totalMoneyMyOrder
     });
   });
-  
+
   _.orderBy(listUser, ['total'], ['asc']).forEach(item =>{
     txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
   });
