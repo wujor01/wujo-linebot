@@ -210,6 +210,29 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
   return await MongoFindQuery(objFilter, "order",{});
 }
 
+async function GetTopPayment(year, month) {
+  month = parseInt(month) - 1;//js 0 là tháng 1
+
+  var objFilter = {
+      $and: [
+      {createddate : {$gte : new Date(year, month, 1)}},
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}}
+      //Không lấy điều kiện lineid nữa vì chưa tìm được cách add rich menu vào group
+      //{lineid : lineid}
+    ]
+  };
+
+  console.log(JSON.stringify(objFilter));
+
+  var listData = await MongoFindQuery(objFilter, "payment",{});
+
+  console.log(JSON.stringify(listData));
+
+  var group = _.chain(listData).groupBy("user").map((value, key) => ({ user: key, payments: value })).value();
+
+  console.log(JSON.stringify(group));
+}
+
 
 async function ConfirmOrder(dateNow, userid, username, lineid) 
 {
@@ -468,6 +491,32 @@ module.exports = async function App(context) {
             return;
           }
           //#endregion
+
+          //#region top thanh toán{
+            if(inputText.indexOf('payment') > -1){
+              var yearmonth = inputText.split('payment')[1].trim();
+  
+              var year = '';
+              var month = '';
+  
+              if (yearmonth == 'month') {
+                year = new Date().getFullYear();
+                month = '0' + (new Date().getMonth() + 1);
+              }else{
+                year = yearmonth.slice(0,4);
+                month = yearmonth.slice(4,6);
+              }
+  
+              if(!year || !month){
+                await context.sendText(`Năm tháng không đúng định dạng (yyyyMM)!`);
+                return;
+              }
+  
+              await GetTopPayment(year, month);
+              await context.sendText('OK');
+              return;
+            }
+          }
 
           var data = await MongoFindQuery({productname: inputText}, "product",{});
   
