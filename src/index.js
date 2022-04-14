@@ -228,7 +228,7 @@ async function GetTopPayment(year, month) {
 
   console.log(JSON.stringify(listData));
 
-  var group = _.chain(listData).groupBy("user").map((value, key) => ({ user: key, payments: value })).value();
+  var group = _.chain(listData).groupBy("user.userid").map((value, key) => ({ user: key, payments: value })).value();
 
   console.log(JSON.stringify(group));
 }
