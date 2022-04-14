@@ -235,7 +235,7 @@ async function GetTopPayment(year, month) {
     x.totalMoneyMyOrder = 0;
     x.payments.forEach(payment => {
       x.totalMoney += payment.totalMoney;
-      let listMyOrders = payment.orders.filter(payment => payment.user.username = payment.user);
+      let listMyOrders = payment.orders.filter(payment => payment.user.username = x.username);
       listMyOrders.forEach(myOrder => {
         x.totalMoneyMyOrder += myOrder.payment;
       });
