@@ -258,7 +258,8 @@ async function GetTopPayment(year, month) {
         username : item.username,
         totalMoney : item.totalMoney,
         totalMoneyMyOrder: item.totalMoneyMyOrder,
-        total: item.totalMoney - item.totalMoneyMyOrder
+        total: item.totalMoney - item.totalMoneyMyOrder,
+        orders: listOrder.filter(x => x.user.id == item.userid)
       });
     });
   }
@@ -280,9 +281,12 @@ async function GetTopPayment(year, month) {
       username : item.username,
       totalMoney : item.totalMoney,
       totalMoneyMyOrder: item.totalMoneyMyOrder,
-      total: item.totalMoney - item.totalMoneyMyOrder
+      total: item.totalMoney - item.totalMoneyMyOrder,
+      orders: item.orders
     });
   });
+
+  console.log(JSON.stringify(listUser));
 
   _.orderBy(listUser, ['total'], ['asc']).forEach(item =>{
     txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
