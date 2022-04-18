@@ -283,7 +283,7 @@ async function GetTopPayment(year, month) {
       totalMoneyMyOrder: item.totalMoneyMyOrder,
       total: item.totalMoney - item.totalMoneyMyOrder,
       orders: item.orders
-    });
+    }); 
   });
 
   console.log(JSON.stringify(listUser));
