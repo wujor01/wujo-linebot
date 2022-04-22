@@ -11,12 +11,17 @@
   "dependencies": {
     "axios": "^0.26.1",
     "bottender": "1.5.5",
+    "chart.js": "^3.7.1",
+    "chartjs-node-canvas": "^4.1.6",
+    "cloudinary": "^1.29.1",
     "eslint": "8.12.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.0.0",
+    "image-charts": "^6.0.18",
     "jest": "27.5.1",
     "lodash": "^4.17.21",
     "mongodb": "^4.4.1",
-    "prettier": "2.6.1"
+    "prettier": "2.6.1",
+    "streamifier": "^0.1.1"
   }
 }

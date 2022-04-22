@@ -6,6 +6,17 @@ var ObjectId = require('mongodb').ObjectId;
 var _ = require('lodash');
 var url = process.env.MONGODB_CONNECTION;
 
+const fs = require('fs');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+var cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
+
+cloudinary.config({ 
+    cloud_name: 'wujo', 
+    api_key: '163757859422761', 
+    api_secret: process.env.CLOUDINARYTOKEN 
+  });
+
 //#region Hàm +- ngày tháng
 Date.prototype.addHours = function(h) {
   this.setTime(this.getTime() + (h*60*60*1000));
@@ -354,6 +365,76 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
   }
 }
 
+//#region Chart
+const width = 2000;
+const height = 2000; 
+const backgroundColour = 'white';
+const chartJSNodeCanvas = new ChartJSNodeCanvas({
+  width,
+  height,
+  backgroundColour,
+});
+
+var config = {
+    type: 'bar',
+    data: {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+};
+
+let streamUpload = (fileBuffer) => {
+    // eslint-disable-next-line no-undef
+    return new Promise((resolve, reject) => {
+        let stream = cloudinary.uploader.upload_stream(
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+
+      streamifier.createReadStream(fileBuffer).pipe(stream);
+    });
+};
+
+async function GetLinkChart(){
+  const dataBuffer = await chartJSNodeCanvas.renderToBufferSync(config);
+  let result = await streamUpload(dataBuffer);
+  console.log(result);
+  return result.secure_url;
+}
+//#endregion
+
 module.exports = async function App(context) {
   try {
     if (context.event.isText) {
@@ -512,6 +593,13 @@ module.exports = async function App(context) {
           txt+= "'payment {yyyyMM}': DS người thanh toán trong tháng đã thanh toán\n";
 
           await context.sendText(txt);
+          break;
+        case 'chart':
+          var urlChart = await GetLinkChart();
+          await context.sendImage({
+            originalContentUrl: urlChart,
+            previewImageUrl: urlChart,
+          });
           break;
         default:
           
