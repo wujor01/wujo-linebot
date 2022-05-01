@@ -297,7 +297,7 @@ async function GetTopPayment(year, month) {
 
   console.log(JSON.stringify(listUser));
 
-  return _.orderBy(listUser, ['total'], ['asc']);
+  return _.orderBy(listUser, ['total'], ['desc']);
 }
 
 
@@ -387,16 +387,13 @@ let streamUpload = (fileBuffer) => {
 };
 
 async function GetLinkChart(topPayment){
-
-  let lstData = _.reverse(topPayment);
-
   var config = {
     type: 'bar',
     data: {
-        labels: lstData.map(x => x.username),
+        labels: topPayment.map(x => x.username),
         datasets: [{
             label: 'Tổng tiền cá nhân - đã thanh toán',
-            data: lstData.map(x => x.total),
+            data: topPayment.map(x => x.total),
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
