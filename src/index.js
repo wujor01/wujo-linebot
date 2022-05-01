@@ -360,8 +360,8 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
 }
 
 //#region Chart
-const width = 1000;
-const height = 500; 
+const width = 1500;
+const height = 800; 
 const backgroundColour = 'white';
 const chartJSNodeCanvas = new ChartJSNodeCanvas({
   width,
