@@ -360,7 +360,7 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
 }
 
 //#region Chart
-const width = 1500;
+const width = 1000;
 const height = 800; 
 const backgroundColour = 'white';
 const chartJSNodeCanvas = new ChartJSNodeCanvas({
@@ -664,11 +664,11 @@ module.exports = async function App(context) {
               return;
             }
 
-            lstData.forEach(item =>{
-              txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
-            });
+            // lstData.forEach(item =>{
+            //   txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
+            // });
 
-            await context.sendText(txt);
+            // await context.sendText(txt);
 
             var urlChart = await GetLinkChart(lstData);
             await context.sendImage({
