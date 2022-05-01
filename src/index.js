@@ -360,8 +360,8 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
 }
 
 //#region Chart
-const width = 2000;
-const height = 2000; 
+const width = 1000;
+const height = 500; 
 const backgroundColour = 'white';
 const chartJSNodeCanvas = new ChartJSNodeCanvas({
   width,
@@ -388,14 +388,15 @@ let streamUpload = (fileBuffer) => {
 
 async function GetLinkChart(topPayment){
 
+  let lstData = _.reverse(topPayment);
 
   var config = {
     type: 'bar',
     data: {
-        labels: topPayment.map(x => x.username),
+        labels: lstData.map(x => x.username),
         datasets: [{
             label: 'Tổng tiền cá nhân - đã thanh toán',
-            data: topPayment.map(x => x.total),
+            data: lstData.map(x => x.total),
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
