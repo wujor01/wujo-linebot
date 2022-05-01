@@ -234,7 +234,7 @@ async function GetTopPayment(year, month) {
   var listData = await MongoFindQuery(objFilter, "payment",{});
 
   if (listData.length == 0) {
-    return `Không có thông tin danh sách thanh toán của tháng ${month + 1} - ${year}`;
+    return listData;
   }
 
   var lstGroupByUser = _.chain(listData).groupBy("user.userid").map((value, key) => ({ userid: key, payments: value })).value();
@@ -246,8 +246,6 @@ async function GetTopPayment(year, month) {
       x.totalMoney += payment.totalMoney;
     });
   });
-
-  var txt = '';
 
   if (lstGroupByUser.length > 0) {
     objFilter = {
@@ -269,7 +267,7 @@ async function GetTopPayment(year, month) {
         username : item.username,
         totalMoney : item.totalMoney,
         totalMoneyMyOrder: item.totalMoneyMyOrder,
-        total: item.totalMoney - item.totalMoneyMyOrder,
+        total: item.totalMoneyMyOrder - item.totalMoney,
         orders: listOrder.filter(x => x.user.id == item.userid)
       });
     });
@@ -299,11 +297,7 @@ async function GetTopPayment(year, month) {
 
   console.log(JSON.stringify(listUser));
 
-  _.orderBy(listUser, ['total'], ['asc']).forEach(item =>{
-    txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
-  });
-
-  return txt;
+  return _.orderBy(listUser, ['total'], ['asc']);
 }
 
 
@@ -375,13 +369,33 @@ const chartJSNodeCanvas = new ChartJSNodeCanvas({
   backgroundColour,
 });
 
-var config = {
+let streamUpload = (fileBuffer) => {
+    // eslint-disable-next-line no-undef
+    return new Promise((resolve, reject) => {
+        let stream = cloudinary.uploader.upload_stream(
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+
+      streamifier.createReadStream(fileBuffer).pipe(stream);
+    });
+};
+
+async function GetLinkChart(topPayment){
+
+
+  var config = {
     type: 'bar',
     data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: topPayment.map(x => x.username),
         datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
+            label: 'Tổng tiền cá nhân - đã thanh toán',
+            data: topPayment.map(x => x.total),
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
@@ -408,26 +422,8 @@ var config = {
             }
         }
     }
-};
+  };
 
-let streamUpload = (fileBuffer) => {
-    // eslint-disable-next-line no-undef
-    return new Promise((resolve, reject) => {
-        let stream = cloudinary.uploader.upload_stream(
-          (error, result) => {
-            if (result) {
-              resolve(result);
-            } else {
-              reject(error);
-            }
-          }
-        );
-
-      streamifier.createReadStream(fileBuffer).pipe(stream);
-    });
-};
-
-async function GetLinkChart(){
   const dataBuffer = await chartJSNodeCanvas.renderToBufferSync(config);
   let result = await streamUpload(dataBuffer);
   console.log(result);
@@ -662,13 +658,28 @@ module.exports = async function App(context) {
               await context.sendText(`Năm tháng không đúng định dạng (yyyyMM)!`);
               return;
             }
-  
-            var txt = await GetTopPayment(year, month);
-            if (!txt) {
-              await context.sendText('Không có danh sách thanh toán');
+
+            let txt = '';
+            var lstData = await GetTopPayment(year, month);
+            if (lstData.length == 0) {
+              await context.sendText(`Không có thông tin danh sách thanh toán của tháng ${month} - ${year}`);
+              return;
             }
 
+            lstData.forEach(item =>{
+              txt += `${item.username} đã thanh toán ${item.totalMoney.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})} (cá nhân ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style: 'currency', currency: 'VND'})})\n`;
+            });
+
             await context.sendText(txt);
+
+            var urlChart = await GetLinkChart(lstData);
+            await context.sendImage({
+              originalContentUrl: urlChart,
+              previewImageUrl: urlChart,
+            });
+
+
+
             return;
           }
           //#endregion

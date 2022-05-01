@@ -21,6 +21,7 @@
     "jest": "27.5.1",
     "lodash": "^4.17.21",
     "mongodb": "^4.4.1",
+    "node-html-to-image": "^3.2.4",
     "prettier": "2.6.1",
     "streamifier": "^0.1.1"
   }

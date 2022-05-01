@@ -3,6 +3,7 @@ const fs = require('fs');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 var cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+const nodeHtmlToImage = require('node-html-to-image')
 
 cloudinary.config({ 
     cloud_name: 'wujo', 
@@ -10,7 +11,7 @@ cloudinary.config({
     api_secret: 'OJOR2Zvx6_2MkwjRW2alGVy83Xk' 
   });
 
-const width = 2000;
+const width = 4000;
 const height = 2000; 
 const backgroundColour = 'white';
 const chartJSNodeCanvas = new ChartJSNodeCanvas({
@@ -22,17 +23,85 @@ const chartJSNodeCanvas = new ChartJSNodeCanvas({
 var config = {
     type: 'bar',
     data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: [
+          'Red', 
+          'Blue', 
+          'Yellow', 
+          'Green', 
+          'Purple', 
+          'Orange',
+          'Red', 
+          'Blue', 
+          'Yellow', 
+          'Green', 
+          'Purple', 
+          'Orange',
+          'Red', 
+          'Blue', 
+          'Yellow', 
+          'Green', 
+          'Purple', 
+          'Orange',
+          'Red', 
+          'Blue', 
+          'Yellow', 
+          'Green', 
+          'Purple', 
+          'Orange',
+        ],
         datasets: [{
             label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
+            data: [
+              -12, 
+              19, 
+              3, 
+              5, 
+              2, 
+              3,
+              12, 
+              19, 
+              3, 
+              5, 
+              2, 
+              3,
+              12, 
+              19, 
+              3, 
+              5, 
+              2, 
+              3,
+              12, 
+              19, 
+              3, 
+              5, 
+              2, 
+              3,
+            ],
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
                 'rgba(255, 206, 86, 0.2)',
                 'rgba(75, 192, 192, 0.2)',
                 'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
             ],
             borderColor: [
                 'rgba(255, 99, 132, 1)',
@@ -40,7 +109,25 @@ var config = {
                 'rgba(255, 206, 86, 1)',
                 'rgba(75, 192, 192, 1)',
                 'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
             ],
             borderWidth: 1
         }]
@@ -86,6 +173,24 @@ async function run() {
       console.log(err);
     }
   });
+
+  nodeHtmlToImage({
+    output: 'image.png',
+    html: `<html>
+    <head>
+      <style>
+        body {
+          width: 2480px;
+          height: 3508px;
+        }
+      </style>
+    </head>
+    <body>Hello world!</body>
+  </html>
+  `
+  })
+    .then(() => console.log('The image was created successfully!'))
+
   return dataUrl;
 }
 
