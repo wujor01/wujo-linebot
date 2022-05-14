@@ -290,7 +290,7 @@ async function GetTopPayment(year, month) {
       username : item.username,
       totalMoney : item.totalMoney,
       totalMoneyMyOrder: item.totalMoneyMyOrder,
-      total: item.totalMoney - item.totalMoneyMyOrder,
+      total: item.totalMoneyMyOrder - item.totalMoney,
       orders: item.orders
     }); 
   });
