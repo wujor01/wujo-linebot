@@ -6,7 +6,6 @@ var ObjectId = require('mongodb').ObjectId;
 var _ = require('lodash');
 var url = process.env.MONGODB_CONNECTION;
 
-const fs = require('fs');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 var cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
@@ -209,7 +208,7 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
   var objFilter = {
       $and: [
       {createddate : {$gte : new Date(year, month, 1)}},
-      {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}},
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1)}},
       {ispaid : ispaid}
       //Không lấy điều kiện lineid nữa vì chưa tìm được cách add rich menu vào group
       //{lineid : lineid}
@@ -227,7 +226,7 @@ async function GetTopPayment(year, month) {
   var objFilter = {
       $and: [
       {createddate : {$gte : new Date(year, month, 1)}},
-      {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}}
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1)}}
     ]
   };
 
@@ -251,7 +250,7 @@ async function GetTopPayment(year, month) {
     objFilter = {
       $and: [
       {createddate : {$gte : new Date(year, month, 1)}},
-      {createddate : {$lt : new Date(year, month, 1).addMonths(1).addDays(-1)}},
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1)}},
       {ispaid : true}
     ]
   };
@@ -360,8 +359,8 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
 }
 
 //#region Chart
-const width = 1000;
-const height = 800; 
+const width = 1500;
+const height = 1200; 
 const backgroundColour = 'white';
 const chartJSNodeCanvas = new ChartJSNodeCanvas({
   width,
@@ -392,7 +391,7 @@ async function GetLinkChart(topPayment){
     data: {
         labels: topPayment.map(x => x.username),
         datasets: [{
-            label: 'Tổng tiền cá nhân - đã thanh toán',
+            label: 'Bảng xếp hạng Máy chủ BHX-Sale',
             data: topPayment.map(x => x.total),
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
