@@ -181,8 +181,8 @@ async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/pro
     };
 
     return await axios(config);
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
   }
 }
 
@@ -214,8 +214,6 @@ async function GetOrderInMonth(year, month, ispaid, lineid){
       //{lineid : lineid}
     ]
   };
-
-  console.log(JSON.stringify(objFilter));
 
   return await MongoFindQuery(objFilter, "order",{});
 }
@@ -294,8 +292,6 @@ async function GetTopPayment(year, month) {
     }); 
   });
 
-  console.log(JSON.stringify(listUser));
-
   return _.orderBy(listUser, ['total'], ['desc']);
 }
 
@@ -345,7 +341,6 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
     ]};
 
     var newvalues = {$set: {ispaid: true, orderid: objInsert._id} };
-    console.log(JSON.stringify(myquery));
 
     await dbo.collection("order").updateMany(myquery, newvalues);
         
@@ -423,7 +418,6 @@ async function GetLinkChart(topPayment){
 
   const dataBuffer = await chartJSNodeCanvas.renderToBufferSync(config);
   let result = await streamUpload(dataBuffer);
-  console.log(result);
   return result.secure_url;
 }
 //#endregion
@@ -560,7 +554,6 @@ module.exports = async function App(context) {
             {"user.id" : context.session.user.id}
           ]
           };
-          console.log(JSON.stringify(query));
 
           var numOrder = await MongoDelete(query, "order");
 
@@ -716,7 +709,7 @@ module.exports = async function App(context) {
           break;
       }
     }
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
   }
 };
