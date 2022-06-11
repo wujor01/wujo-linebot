@@ -169,7 +169,7 @@ async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id
   }
 }
 
-async function CallAPILine(method = 'get', url = 'https://api.line.me/v2/bot/profile/Uf072abc9505c04336bb29af8ae9c1a11') 
+async function CallAPILine(method = 'get', url = '') 
 {
   try {
     var config = {
