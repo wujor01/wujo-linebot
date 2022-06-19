@@ -353,6 +353,70 @@ async function ConfirmOrder(dateNow, userid, username, lineid)
   }
 }
 
+async function InitDataFirstMonth(year, month){
+  var dateLastMonth = new Date(year, month);
+  dateLastMonth.addMonths(-1);
+  //tháng trước 
+  var lastMonth = dateLastMonth.getMonth() + 1;
+  var listDataLastMonth = await GetTopPayment(year, lastMonth);
+
+  //#region Xử lý chung transaction
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+  const session = client.startSession();
+
+  const transactionOptions = {
+    readPreference: 'primary',
+    readConcern: { level: 'majority' },
+    writeConcern: { w: 'majority' }
+  };
+
+  try {
+
+    var now = new Date();
+    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    var dateNow = utc.addHours(7);
+
+    const transactionResults = await session.withTransaction(async () => {
+          listDataLastMonth.forEach(item => {
+            var objInsert = {
+              user: {
+                userid: item.userid,
+                username: item.username
+              },
+              orders: [],
+              totalMoney: -item.total,
+              createddate: dateNow
+            };
+          
+            await client.db('mydb').collection('payment').insertOne(objInsert);
+          });
+        }, transactionOptions);
+
+      if (transactionResults) {
+        console.log('The reservation was successfully created.');
+        return "true";
+      } else {
+        console.log('The transaction was intentionally aborted.');
+        return "The transaction was intentionally aborted.";
+      };
+  } catch (err) {
+    console.log(err);
+    return JSON.stringify(err);
+  } finally {
+    await session.endSession();
+  }
+  //#endregion
+
+}
+
 //#region Chart
 const width = 1500;
 const height = 1200; 
@@ -652,8 +716,20 @@ module.exports = async function App(context) {
             let txt = '';
             var lstData = await GetTopPayment(year, month);
             if (lstData.length == 0) {
-              await context.sendText(`Không có thông tin danh sách thanh toán của tháng ${month} - ${year}`);
-              return;
+              //Nếu gọi không có dữ liệu của tháng hiện tại => Chưa init dữ liệu của tháng trước cho tháng này => Đi init
+              if (yearmonth == 'month') {
+                var message = await InitDataFirstMonth(year, month);
+                if (message == 'true') {
+                  //Init thành công thì gọi lại hàm lấy thông tin payment trong tháng
+                  lstData = await GetTopPayment(year, month);
+                }else{
+                  await context.sendText(`Lỗi lấy thông tin dữ liệu đầu tháng: ${message}`);
+                  return;
+                }
+              }else{
+                await context.sendText(`Không có thông tin danh sách thanh toán của tháng ${month} - ${year}`);
+                return;
+              }
             }
 
             // lstData.forEach(item =>{
