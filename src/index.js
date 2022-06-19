@@ -385,7 +385,8 @@ async function InitDataFirstMonth(year, month){
     var dateNow = utc.addHours(7);
 
     const transactionResults = await session.withTransaction(async () => {
-          listDataLastMonth.forEach(item => {
+          for (let i = 0; i < listDataLastMonth.length; i++) {
+            var item = listDataLastMonth[i];
             var objInsert = {
               user: {
                 userid: item.userid,
@@ -395,9 +396,9 @@ async function InitDataFirstMonth(year, month){
               totalMoney: -item.total,
               createddate: dateNow
             };
-          
+
             await client.db('mydb').collection('payment').insertOne(objInsert);
-          });
+          }
         }, transactionOptions);
 
       if (transactionResults) {
