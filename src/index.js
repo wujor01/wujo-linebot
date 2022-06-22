@@ -445,13 +445,13 @@ let streamUpload = (fileBuffer) => {
     });
 };
 
-async function GetLinkChart(topPayment){
+async function GetLinkChart(topPayment, _label = 'Bảng xếp hạng Máy chủ BHX-Sale'){
   var config = {
     type: 'bar',
     data: {
         labels: topPayment.map(x => x.username),
         datasets: [{
-            label: 'Bảng xếp hạng Máy chủ BHX-Sale',
+            label: _label,
             data: topPayment.map(x => x.total),
             backgroundColor: [
                 'rgba(255, 99, 132, 0.2)',
