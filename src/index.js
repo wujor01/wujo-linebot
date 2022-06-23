@@ -756,6 +756,10 @@ module.exports = async function App(context) {
                 txt += `${item.username} đã order hết ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style:     'currency', currency: 'VND'})}\n`;
               });
 
+              txt+= `-----------------------\n`
+
+              txt+= `Tổng: ${_.sumBy(lstDataOrderByMyOrder, 'totalMoneyMyOrder').toLocaleString('vi-VN',{style:     'currency', currency: 'VND'})}\n`
+
               await context.sendText(txt);
             }
 
