@@ -1,197 +1,257 @@
+/* eslint-disable no-redeclare */
 /* eslint-disable prettier/prettier */
-const fs = require('fs');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+var MongoClient = require('mongodb').MongoClient;
+var _ = require('lodash');
+var url = 'mongodb+srv://wujor14:8PdCj1bwZoFRUIYc@cluster0.jdltp.mongodb.net/';
+
 var cloudinary = require('cloudinary').v2;
-const streamifier = require('streamifier');
-const nodeHtmlToImage = require('node-html-to-image')
 
 cloudinary.config({ 
     cloud_name: 'wujo', 
     api_key: '163757859422761', 
-    api_secret: 'OJOR2Zvx6_2MkwjRW2alGVy83Xk' 
+    api_secret: process.env.CLOUDINARYTOKEN 
   });
 
-const width = 4000;
-const height = 2000; 
-const backgroundColour = 'white';
-const chartJSNodeCanvas = new ChartJSNodeCanvas({
-  width,
-  height,
-  backgroundColour,
-});
-
-var config = {
-    type: 'bar',
-    data: {
-        labels: [
-          'Red', 
-          'Blue', 
-          'Yellow', 
-          'Green', 
-          'Purple', 
-          'Orange',
-          'Red', 
-          'Blue', 
-          'Yellow', 
-          'Green', 
-          'Purple', 
-          'Orange',
-          'Red', 
-          'Blue', 
-          'Yellow', 
-          'Green', 
-          'Purple', 
-          'Orange',
-          'Red', 
-          'Blue', 
-          'Yellow', 
-          'Green', 
-          'Purple', 
-          'Orange',
-        ],
-        datasets: [{
-            label: '# of Votes',
-            data: [
-              -12, 
-              19, 
-              3, 
-              5, 
-              2, 
-              3,
-              12, 
-              19, 
-              3, 
-              5, 
-              2, 
-              3,
-              12, 
-              19, 
-              3, 
-              5, 
-              2, 
-              3,
-              12, 
-              19, 
-              3, 
-              5, 
-              2, 
-              3,
-            ],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-};
-
-let streamUpload = (fileBuffer) => {
-    return new Promise((resolve, reject) => {
-        let stream = cloudinary.uploader.upload_stream(
-          (error, result) => {
-            if (result) {
-              resolve(result);
-            } else {
-              reject(error);
-            }
-          }
-        );
-
-      streamifier.createReadStream(fileBuffer).pipe(stream);
-    });
-};
-
-async function run() {
-  console.log('run');
-  const dataUrl = await chartJSNodeCanvas.renderToDataURL(config);
-  const base64Image = dataUrl;
-
-  //const dataBuffer = await chartJSNodeCanvas.renderToBufferSync(configuration);
-  //let result = await streamUpload(dataBuffer);
-  //console.log(result);
-
-  var base64Data = base64Image.replace(/^data:image\/png;base64,/, '');
-
-  fs.writeFile('out.png', base64Data, 'base64', function (err) {
-    if (err) {
-      console.log(err);
-    }
-  });
-
-  nodeHtmlToImage({
-    output: 'image.png',
-    html: `<html>
-    <head>
-      <style>
-        body {
-          width: 2480px;
-          height: 3508px;
-        }
-      </style>
-    </head>
-    <body>Hello world!</body>
-  </html>
-  `
-  })
-    .then(() => console.log('The image was created successfully!'))
-
-  return dataUrl;
+//#region Hàm +- ngày tháng
+Date.prototype.addHours = function(h) {
+  this.setTime(this.getTime() + (h*60*60*1000));
+  return this;
 }
 
-run();
+Date.prototype.addDays = function(days) {
+  var date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
+Date.prototype.addMonths = function (value) {
+  var n = this.getDate();
+  this.setDate(1);
+  this.setMonth(this.getMonth() + value);
+  this.setDate(Math.min(n, this.getDaysInMonth()));
+  return this;
+};
+
+Date.isLeapYear = function (year) { 
+  return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0)); 
+};
+
+Date.getDaysInMonth = function (year, month) {
+  return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+};
+
+Date.prototype.isLeapYear = function () { 
+  return Date.isLeapYear(this.getFullYear()); 
+};
+
+Date.prototype.getDaysInMonth = function () { 
+  return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+};
+
+Date.prototype.toVNDateString = function () { 
+  const yyyy = this.getFullYear();
+  let mm = this.getMonth() + 1; // Months start at 0!
+  let dd = this.getDate();
+
+  if (dd < 10) dd = '0' + dd;
+  if (mm < 10) mm = '0' + mm;
+
+  return dd + '/' + mm + '/' + yyyy;
+};
+//#endregion
+
+async function MongoFindQuery(query, collection = 'bubble', fieldsRemove = { _id: 0 }) 
+{
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+
+  try {
+    var dbo = client.db('mydb');
+    let res = await dbo
+      .collection(collection)
+      .find(query)
+      .project(fieldsRemove)
+      .toArray();
+    return res;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    client.close();
+  }
+}
+
+async function GetTopPayment(year, month) {
+  month = parseInt(month) - 1;//js 0 là tháng 1
+
+  var objFilter = {
+      $and: [
+      {createddate : {$gte : new Date(year, month, 1)}},
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1)}}
+    ]
+  };
+
+  var listData = await MongoFindQuery(objFilter, "payment",{});
+
+  if (listData.length == 0) {
+    return listData;
+  }
+
+  var lstGroupByUser = _.chain(listData).groupBy("user.userid").map((value, key) => ({ userid: key, payments: value })).value();
+
+  lstGroupByUser.forEach(x => {
+    x.totalMoney = 0;
+    x.username = x.payments[0].user.username;
+    x.payments.forEach(payment => {
+      x.totalMoney += payment.totalMoney;
+    });
+  });
+
+  if (lstGroupByUser.length > 0) {
+    objFilter = {
+      $and: [
+      {createddate : {$gte : new Date(year, month, 1)}},
+      {createddate : {$lt : new Date(year, month, 1).addMonths(1)}},
+      {ispaid : true}
+    ]
+  };
+    var listOrder = await MongoFindQuery(objFilter, "order",{});
+
+    var listUser = [];
+
+    lstGroupByUser.forEach(item => {
+      item.totalMoneyMyOrder = listOrder.filter(x => x.user.id == item.userid).reduce((a,curr) => a + curr.payment, 0);
+
+      listUser.push({
+        userid: item.userid,
+        username : item.username,
+        totalMoney : item.totalMoney,
+        totalMoneyMyOrder: item.totalMoneyMyOrder,
+        total: item.totalMoneyMyOrder - item.totalMoney,
+        orders: listOrder.filter(x => x.user.id == item.userid)
+      });
+    });
+  }
+
+  var listOrderByUserNotPayment = listOrder.filter(order => listUser.map(user => user.userid).findIndex(x => x == order.user.id) == -1);
+
+  var listGroupByUserNotPayment = _.chain(listOrderByUserNotPayment).groupBy("user.id").map((value, key) => ({ userid: key, orders: value })).value();
+  
+  listGroupByUserNotPayment.forEach(item => {
+    item.username = item.orders[0].user.username;
+    item.totalMoney = 0;
+    item.totalMoneyMyOrder = 0;
+    item.orders.forEach(order => {
+      item.totalMoneyMyOrder += order.payment;
+    });
+
+    listUser.push({
+      userid: item.userid,
+      username : item.username,
+      totalMoney : item.totalMoney,
+      totalMoneyMyOrder: item.totalMoneyMyOrder,
+      total: item.totalMoneyMyOrder - item.totalMoney,
+      orders: item.orders
+    }); 
+  });
+
+  return _.orderBy(listUser, ['total'], ['desc']);
+}
+
+async function MongoInsert(obj, collection = 'message') 
+{
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+
+  try {
+    var dbo = client.db('mydb');
+    await dbo.collection(collection).insertOne(obj);
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  } finally {
+    client.close();
+  }
+}
+
+async function InitDataFirstMonth(year, month){
+  var dateLastMonth = new Date(year, month);
+  dateLastMonth.addMonths(-1);
+  //tháng trước 
+  var lastMonth = dateLastMonth.getMonth() + 1;
+  var listDataLastMonth = await GetTopPayment(year, lastMonth);
+
+  //#region Xử lý chung transaction
+  const client = await MongoClient.connect(url, {
+    useNewUrlParser: true,
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  if (!client) {
+    return;
+  }
+
+  const paymentsCollection = client.db('mydb').collection('payment');
+  const session = client.startSession();
+
+  const transactionOptions = {
+    readPreference: 'primary',
+    readConcern: { level: 'majority' },
+    writeConcern: { w: 'majority' }
+  };
+
+  try {
+
+    var now = new Date();
+    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    var dateNow = utc.addHours(7);
+
+    const transactionResults = await session.withTransaction(async () => {
+          for (let i = 0; i < listDataLastMonth.length; i++) {
+            var item = listDataLastMonth[i];
+            var objInsert = {
+              user: {
+                userid: item.userid,
+                username: item.username
+              },
+              orders: [],
+              totalMoney: -item.total,
+              createddate: dateNow
+            };
+
+            await paymentsCollection.insertOne(objInsert, { session });
+          }
+        }, transactionOptions);
+
+      if (transactionResults) {
+        console.log('The reservation was successfully created.');
+        return "true";
+      } else {
+        console.log('The transaction was intentionally aborted.');
+        return "The transaction was intentionally aborted.";
+      };
+  } catch (err) {
+    console.log(err);
+    return JSON.stringify(err);
+  } finally {
+    await session.endSession();
+  }
+  //#endregion
+
+}
+InitDataFirstMonth(2022,6);
