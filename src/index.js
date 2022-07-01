@@ -360,61 +360,81 @@ async function InitDataFirstMonth(year, month){
   var lastMonth = dateLastMonth.getMonth() + 1;
   var listDataLastMonth = await GetTopPayment(year, lastMonth);
 
-  //#region Xử lý chung transaction
-  const client = await MongoClient.connect(url, {
-    useNewUrlParser: true,
-  }).catch((err) => {
-    console.log(err);
-  });
+  var now = new Date();
+  var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+  var dateNow = utc.addHours(7);
+  //Tạm chạy ngoài transaction research thêm sau
+  for (let i = 0; i < listDataLastMonth.length; i++) {
+    var item = listDataLastMonth[i];
+    var objInsert = {
+      user: {
+        userid: item.userid,
+        username: item.username
+      },
+      orders: [],
+      totalMoney: -item.total,
+      createddate: dateNow
+    };
 
-  if (!client) {
-    return;
+    await MongoInsert(objInsert, 'payment');
   }
-  const paymentsCollection = client.db('mydb').collection('payment');
-  const session = client.startSession();
 
-  const transactionOptions = {
-    readPreference: 'primary',
-    readConcern: { level: 'majority' },
-    writeConcern: { w: 'majority' }
-  };
+  // //#region Xử lý chung transaction
+  // const client = await MongoClient.connect(url, {
+  //   useNewUrlParser: true,
+  // }).catch((err) => {
+  //   console.log(err);
+  // });
 
-  try {
+  // if (!client) {
+  //   return;
+  // }
 
-    var now = new Date();
-    var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    var dateNow = utc.addHours(7);
+  // const paymentsCollection = client.db('mydb').collection('payment');
+  // const session = client.startSession();
 
-    const transactionResults = await session.withTransaction(async () => {
-          for (let i = 0; i < listDataLastMonth.length; i++) {
-            var item = listDataLastMonth[i];
-            var objInsert = {
-              user: {
-                userid: item.userid,
-                username: item.username
-              },
-              orders: [],
-              totalMoney: -item.total,
-              createddate: dateNow
-            };
+  // const transactionOptions = {
+  //   readPreference: 'primary',
+  //   readConcern: { level: 'majority' },
+  //   writeConcern: { w: 'majority' }
+  // };
 
-            await paymentsCollection.insertOne(objInsert, { session });
-          }
-        }, transactionOptions);
+  // try {
 
-      if (transactionResults) {
-        console.log('The reservation was successfully created.');
-        return "true";
-      } else {
-        console.log('The transaction was intentionally aborted.');
-        return "The transaction was intentionally aborted.";
-      };
-  } catch (err) {
-    console.log(err);
-    return JSON.stringify(err);
-  } finally {
-    await session.endSession();
-  }
+  //   var now = new Date();
+  //   var utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+  //   var dateNow = utc.addHours(7);
+
+  //   const transactionResults = await session.withTransaction(async () => {
+  //         for (let i = 0; i < listDataLastMonth.length; i++) {
+  //           var item = listDataLastMonth[i];
+  //           var objInsert = {
+  //             user: {
+  //               userid: item.userid,
+  //               username: item.username
+  //             },
+  //             orders: [],
+  //             totalMoney: -item.total,
+  //             createddate: dateNow
+  //           };
+
+  //           await paymentsCollection.insertOne(objInsert, { session });
+  //         }
+  //       }, transactionOptions);
+
+  //     if (transactionResults) {
+  //       console.log('The reservation was successfully created.');
+  //       return "true";
+  //     } else {
+  //       console.log('The transaction was intentionally aborted.');
+  //       return "The transaction was intentionally aborted.";
+  //     };
+  // } catch (err) {
+  //   console.log(err);
+  //   return JSON.stringify(err);
+  // } finally {
+  //   await session.endSession();
+  // }
   //#endregion
 
 }
