@@ -370,6 +370,7 @@ async function InitDataFirstMonth(year, month){
   if (!client) {
     return;
   }
+  const paymentsCollection = client.db('mydb').collection('payment');
   const session = client.startSession();
 
   const transactionOptions = {
@@ -397,7 +398,7 @@ async function InitDataFirstMonth(year, month){
               createddate: dateNow
             };
 
-            await client.db('mydb').collection('payment').insertOne(objInsert);
+            await paymentsCollection.insertOne(objInsert, { session });
           }
         }, transactionOptions);
 
