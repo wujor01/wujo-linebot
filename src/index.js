@@ -745,23 +745,23 @@ module.exports = async function App(context) {
               previewImageUrl: urlChart,
             });
 
-            var datenow = new Date();
+            // var datenow = new Date();
 
-            //Ngày đầu tháng trả về thêm thông tin chi tiêu tháng vừa qua
-            if (datenow.getDate() === 1 || datenow.getDate() === 2) {
-              var lstDataOrderByMyOrder = _.orderBy(lstData, ['totalMoneyMyOrder'], ['desc']);
+            // //Ngày đầu tháng trả về thêm thông tin chi tiêu tháng vừa qua
+            // if (datenow.getDate() === 1 || datenow.getDate() === 2) {
+            //   var lstDataOrderByMyOrder = _.orderBy(lstData, ['totalMoneyMyOrder'], ['desc']);
 
-              txt = '--TỔNG TIỀN THÁNG TRƯỚC--\n';
-              lstDataOrderByMyOrder.forEach(item =>{
-                txt += `${item.username} đã order hết ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style:     'currency', currency: 'VND'})}\n`;
-              });
+            //   txt = '--TỔNG TIỀN THÁNG TRƯỚC--\n';
+            //   lstDataOrderByMyOrder.forEach(item =>{
+            //     txt += `${item.username} đã order hết ${item.totalMoneyMyOrder.toLocaleString('vi-VN',{style:     'currency', currency: 'VND'})}\n`;
+            //   });
 
-              txt+= `-----------------------\n`
+            //   txt+= `-----------------------\n`
 
-              txt+= `Tổng: ${_.sumBy(lstDataOrderByMyOrder, 'totalMoneyMyOrder').toLocaleString('vi-VN',{style:     'currency', currency: 'VND'})}\n`
+            //   txt+= `Tổng: ${_.sumBy(lstDataOrderByMyOrder, 'totalMoneyMyOrder').toLocaleString('vi-VN',{style:     'currency', currency: 'VND'})}\n`
 
-              await context.sendText(txt);
-            }
+            //   await context.sendText(txt);
+            // }
 
             return;
           }
